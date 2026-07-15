@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { startMatrix, stopMatrix, isMatrixRunning } from "../../src/effects/matrix";
 import { parseInput } from "../../src/core/parser";
 import { History } from "../../src/core/history";
@@ -42,7 +43,26 @@ describe("matrix effect", () => {
     expect(document.getElementById("matrix-canvas")).toBeNull();
   });
 
-  it("Escape detiene la animación aunque el overlay tape la pantalla", () => {
+  it("el canvas usa z-index negativo (necesario para pintar detrás de #terminal, que es static)", () => {
+    startMatrix();
+    const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
+    expect(canvas).not.toBeNull();
+    expect(Number(canvas.style.zIndex)).toBeLessThan(0);
+  });
+
+  it("asume que #terminal sigue siendo position:static sin z-index propio", () => {
+    // Guard de la premisa detrás del test anterior: un z-index negativo en
+    // el canvas solo pinta "detrás" de #terminal porque #terminal es
+    // static/z-index:auto (src/style.css). Si alguien le agrega `position`
+    // o `z-index` a la regla #terminal, este test falla y avisa que hay
+    // que revisar de nuevo el z-index del canvas en src/effects/matrix.ts.
+    const css = readFileSync("src/style.css", "utf-8");
+    const terminalRule = css.match(/#terminal\s*\{([^}]*)\}/)?.[1] ?? "";
+    expect(terminalRule).not.toMatch(/position\s*:/);
+    expect(terminalRule).not.toMatch(/z-index\s*:/);
+  });
+
+  it("Escape detiene la animación (atajo rápido, no la única forma de salir)", () => {
     startMatrix();
     expect(isMatrixRunning()).toBe(true);
 

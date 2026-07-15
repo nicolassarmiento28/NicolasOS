@@ -1,4 +1,4 @@
-/** Animación de lluvia de código estilo Matrix, en un canvas fixed sobre el terminal. */
+/** Animación de lluvia de código estilo Matrix, en un canvas fixed detrás del terminal. */
 
 const CHARS = "アイウエオカキクケコサシスセソ0123456789ABCDEF";
 const FONT_SIZE = 16;
@@ -21,7 +21,11 @@ export function startMatrix(): void {
   canvas.height = window.innerHeight;
   canvas.style.position = "fixed";
   canvas.style.inset = "0";
-  canvas.style.zIndex = "9999";
+  // #terminal es position:static (src/style.css) sin z-index propio, así
+  // que CUALQUIER z-index positivo en un elemento posicionado (fixed) pinta
+  // por encima de contenido static, sin importar el valor. Solo un z-index
+  // NEGATIVO corre detrás de contenido static, sin tapar prompt/output/input.
+  canvas.style.zIndex = "-1";
   canvas.style.pointerEvents = "none";
   document.body.appendChild(canvas);
 
@@ -45,11 +49,6 @@ export function startMatrix(): void {
       }
       drops[i]++;
     }
-    // hint fijo: el canvas cubre la terminal, así que la salida tiene
-    // que quedar visible encima de la propia animación.
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "14px monospace";
-    ctx.fillText("Escape para salir", 12, canvas.height - 12);
     rafId = requestAnimationFrame(draw);
   }
 

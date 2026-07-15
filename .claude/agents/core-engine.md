@@ -25,6 +25,11 @@ y `specs/06-effects-v2.md` si la tarea es matrix/music (solo si ya está desbloq
 ## Convenciones específicas de effects
 - Cualquier animación (matrix) debe correr sin bloquear el input del terminal
   ni el historial — usar `requestAnimationFrame`, nunca loops síncronos largos.
+- Cualquier overlay visual (matrix) corre DETRÁS de la terminal, nunca la tapa
+  — el usuario tiene que poder seguir viendo el prompt/output/input mientras
+  el efecto corre de fondo. `#terminal` es `position: static` sin z-index
+  propio (`src/style.css`): un z-index positivo en un elemento `fixed` pinta
+  por encima igual, sin importar el valor — usar z-index **negativo**.
 - Cualquier audio (music) es siempre opt-in explícito por comando, nunca autoplay.
 - Test obligatorio de que la animación/audio activo no rompe parser ni historial.
 

@@ -21,17 +21,23 @@ ejecute `music` explícitamente, y hay forma clara de apagarlo.
 
 ## `matrix`
 - Animación de lluvia de código en canvas.
+- Corre DETRÁS de la terminal, nunca la tapa — el usuario debe poder
+  seguir viendo el prompt, el output y escribiendo comandos con la
+  animación de fondo. `#terminal` (`src/style.css`) es `position: static`
+  sin z-index propio, así que un `z-index` positivo en el canvas
+  (elemento `fixed`) siempre pinta por encima sin importar el valor —
+  hace falta `z-index` **negativo** en el canvas para que quede detrás.
 - No debe bloquear el input del terminal mientras corre (funcionalmente:
   el parser y el historial siguen operando).
-- El overlay cubre visualmente la terminal (es el efecto buscado), así
-  que además tiene que haber una forma de salir que NO dependa de ver
-  la pantalla: tecla `Escape` detiene la animación, y un hint de texto
-  fijo sobre el propio canvas indica "Escape para salir" mientras corre.
+- `Escape` también detiene la animación, como atajo rápido — pero no es
+  la única forma de salir, ya que `matrix` (mismo comando) sigue visible
+  y tipeable en todo momento al no estar tapada la terminal.
 
 **Criterio de aceptación**: test de que `matrix` no rompe el parser ni
 el historial mientras la animación está activa. Test de que `Escape`
-detiene la animación. Verificación visual (Playwright) de que el hint
-de salida es legible sobre el canvas.
+detiene la animación. Verificación visual (Playwright) de que la
+terminal (prompt, output, input) sigue siendo legible y usable con la
+animación corriendo.
 
 ## Analítica de comandos
 - Trackear qué comandos usa la gente, sin cookies de terceros invasivas.
