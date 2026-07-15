@@ -17,6 +17,8 @@ import { themeCommand } from "./commands/theme";
 import { clearCommand } from "./commands/clear";
 import { historyCommand } from "./commands/history";
 import { sudoCommand } from "./commands/sudo";
+import { THEMES } from "./themes/themes";
+import { unknownCommandMessage } from "./core/suggest";
 
 // registro de comandos: firma estándar (args) => CommandResult, según
 // src/commands/types.ts. "history" es el único caso especial (necesita la
@@ -67,7 +69,7 @@ function runCommand(raw: string): CommandResult {
   if (cmd === "history") return historyCommand(args, history.list());
   const handler = COMMANDS[cmd];
   if (!handler) {
-    return { output: `Comando no encontrado: ${cmd}. Escribe "help" para ver la lista.` };
+    return { output: unknownCommandMessage(cmd, Object.keys(THEMES)) };
   }
   return handler(args);
 }

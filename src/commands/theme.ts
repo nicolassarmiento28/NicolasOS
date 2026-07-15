@@ -8,7 +8,10 @@ export function themeCommand(args: string[]): CommandResult {
   if (args.length === 0) {
     return { output: `Temas disponibles: ${THEME_NAMES.join(", ")}` };
   }
-  const name = args[0].toLowerCase();
+  const arg = args[0].toLowerCase();
+  // acepta nombre o número de índice (1-based, según orden de listado)
+  const index = Number(arg);
+  const name = Number.isInteger(index) ? THEME_NAMES[index - 1] ?? arg : arg;
   if (!applyTheme(name)) {
     return {
       output: `Tema no encontrado: ${name}. Temas disponibles: ${THEME_NAMES.join(", ")}`,

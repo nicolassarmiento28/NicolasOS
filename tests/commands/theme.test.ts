@@ -29,6 +29,12 @@ describe("themeCommand", () => {
     expect(document.documentElement.style.getPropertyValue("--theme-bg")).toBe("#000000");
   });
 
+  it("theme <número> aplica el tema por índice de listado", () => {
+    const result = themeCommand(["2"]);
+    expect(result.output).toContain("linux");
+    expect(getCurrentTheme()).toBe("linux");
+  });
+
   it("informa error con un nombre de tema inválido, sin lanzar excepción", () => {
     const result = themeCommand(["windows-xp"]);
     expect(result.output).toContain("no encontrado");

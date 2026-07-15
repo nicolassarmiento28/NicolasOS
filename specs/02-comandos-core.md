@@ -10,6 +10,24 @@ comandos base del portafolio.
 - `history.ts` — navegación con flecha arriba/abajo, sin duplicar entradas
   consecutivas idénticas.
 
+### Navegación de historial con teclado — detalle
+- **Flecha arriba (`ArrowUp`)**: retrocede al comando anterior en el
+  historial y lo carga en el input. No pasar del primer comando (el más viejo).
+- **Flecha abajo (`ArrowDown`)**: avanza al comando siguiente (más reciente).
+  Si ya está en el último, limpiar el input (vuelve a estado vacío).
+- **Flechas izquierda/derecha**: mueven el cursor dentro de la línea actual,
+  NO navegan el historial — comportamiento nativo del input, no hay que
+  interceptarlas.
+- Al ejecutar un comando nuevo, el índice de navegación se resetea al final
+  del array (apunta después del último comando).
+- Se escucha en el evento `keydown` del input del terminal.
+
+**Criterio de aceptación**: test que simula `ArrowUp` dos veces seguido de
+`ArrowDown` una vez y confirma que el input muestra el comando
+correspondiente en cada paso. Test de que ejecutar un comando nuevo resetea
+el índice (una `ArrowUp` después vuelve al último comando ejecutado, no al
+que estaba antes de resetear).
+
 **Criterio de aceptación**: tests unitarios de `parser.ts` cubren alias,
 espacios extra, mayúsculas y comandos vacíos. `history.ts` tiene test de
 navegación en ambas direcciones y de reset.
