@@ -7,6 +7,9 @@ de terminal. El visitante interactúa vía comandos en lugar de navegar por secc
 ## Stack
 - Vite + TypeScript (sin framework)
 - Vitest para tests unitarios
+- `@types/node` como devDependency (necesario en cuanto cualquier test o
+  módulo use `node:fs`, `node:path`, etc. — sin esto el build falla en
+  Vercel aunque `npm test` pase en verde)
 - Deploy: Vercel (lo maneja el usuario directamente)
 - Sin backend — 100% estático
 
@@ -45,7 +48,7 @@ subagente reciba trabajo fuera de su `alcance` declarado.
 | 03-temas.md | themes |
 | 04-contenido.md | content |
 | 05-seo-fallback.md | onboarding-ux (misma superficie de contenido que la vista fallback) |
-| 06-effects-v2.md | core-engine (mismo dueño del motor; criterio de aceptación de matrix/music es no romper parser/historial) |
+| 06-effects-v2.md | *(sin agente creado aún — bloqueado, no es urgente)* |
 | 07-qa-testing.md | qa-testing (transversal) |
 | 08-seguridad.md | seguridad (transversal) |
 | build/deploy | devops |
@@ -73,4 +76,4 @@ cualquiera "por descarte" — no improvisar un dueño.
 
 ## No tocar
 - Config/deploy de Vercel — lo maneja el usuario.
-- `src/effects/` hasta que 06-effects-v2.md esté habilitado explícitamente (ya lo está: bloque 01-05/07/08 cerrado, dueño core-engine).
+- `src/effects/` hasta que 06-effects-v2.md esté habilitado explícitamente.

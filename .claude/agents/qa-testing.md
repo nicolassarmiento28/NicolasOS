@@ -16,6 +16,8 @@ más el spec de dominio específico de la tarea que se está validando.
 - Correr `npm test` completo (no solo el módulo nuevo).
 - Confirmar que el test cubre el criterio de aceptación del spec de dominio,
   no solo que "no tire error".
+- Usar el MCP de Playwright para validar visualmente lo que los tests
+  automatizados no cubren (temas, mobile, chips tappeables).
 
 ## No tocar
 - No escribe código de producción. Si encuentra una falla, la reporta para
@@ -25,5 +27,8 @@ más el spec de dominio específico de la tarea que se está validando.
 1. ¿El test corresponde al criterio de aceptación del spec, o es trivial?
 2. ¿Corre en aislamiento?
 3. ¿`npm test` pasa en verde para todo el proyecto?
+4. ¿`npm run build` pasa en verde? No alcanza con que los tests pasen —
+   errores de tipos (ej. módulos nativos de Node sin `@types/node`) solo
+   aparecen en el build, no en `npm test`.
 
-Si las tres respuestas son sí, aprobar el commit. Si no, bloquear y explicar qué falta.
+Si las cuatro respuestas son sí, aprobar el commit. Si no, bloquear y explicar qué falta.
