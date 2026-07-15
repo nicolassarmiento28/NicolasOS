@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+  background: #0a0a0a;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+}
+
+#terminal {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
+#output {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+#output .echo {
+  color: #6f6;
+}
+
+#input-line {
+  display: flex;
+  gap: 0.5rem;
+}
+
+#input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
