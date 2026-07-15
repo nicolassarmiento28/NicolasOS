@@ -1,11 +1,18 @@
 import type { CommandResult } from "./types";
+import { applyTheme, THEMES } from "../themes/themes";
 
-// ponytail: 03-temas.md todavía no está implementado (src/themes/ no existe).
-// Este comando solo lista los nombres previstos; "theme <n>" para cambiar el
-// tema activo se conecta cuando exista el sistema de temas real.
-const THEMES = ["cyberpunk", "linux", "dos"];
+const THEME_NAMES = Object.keys(THEMES);
 
-/** Lista los temas disponibles (placeholder, sin lógica de cambio real). */
-export function themeCommand(_args: string[]): CommandResult {
-  return { output: `Temas disponibles: ${THEMES.join(", ")}` };
+/** Lista los temas disponibles o cambia el tema activo (`theme <nombre>`). */
+export function themeCommand(args: string[]): CommandResult {
+  if (args.length === 0) {
+    return { output: `Temas disponibles: ${THEME_NAMES.join(", ")}` };
+  }
+  const name = args[0].toLowerCase();
+  if (!applyTheme(name)) {
+    return {
+      output: `Tema no encontrado: ${name}. Temas disponibles: ${THEME_NAMES.join(", ")}`,
+    };
+  }
+  return { output: `Tema aplicado: ${name}` };
 }
