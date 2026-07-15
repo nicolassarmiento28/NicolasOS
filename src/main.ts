@@ -17,6 +17,7 @@ import { clearCommand } from "./commands/clear";
 import { historyCommand } from "./commands/history";
 import { sudoCommand } from "./commands/sudo";
 import { matrixCommand } from "./commands/matrix";
+import { musicCommand } from "./commands/music";
 import { THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
 import { profile, projects, skills, contact } from "./data/content";
@@ -39,6 +40,7 @@ const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
   clear: clearCommand,
   sudo: sudoCommand,
   matrix: matrixCommand,
+  music: musicCommand,
 };
 
 // nombres de comandos reales, usados para sugerencias de typo (ver src/core/suggest.ts)
