@@ -8,7 +8,6 @@ import { aboutCommand } from "./commands/about";
 import { projectsCommand } from "./commands/projects";
 import { openCommand } from "./commands/open";
 import { skillsCommand } from "./commands/skills";
-import { experienceCommand } from "./commands/experience";
 import { resumeCommand } from "./commands/resume";
 import { contactCommand } from "./commands/contact";
 import { githubCommand } from "./commands/github";
@@ -30,7 +29,6 @@ const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
   projects: projectsCommand,
   open: openCommand,
   skills: skillsCommand,
-  experience: experienceCommand,
   resume: resumeCommand,
   contact: contactCommand,
   github: githubCommand,

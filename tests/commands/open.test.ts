@@ -1,20 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { openCommand } from "../../src/commands/open";
-import { PROJECTS } from "../../src/commands/projects";
+import { projects } from "../../src/data/content";
 
 describe("openCommand", () => {
   beforeEach(() => {
     vi.stubGlobal("open", vi.fn());
   });
 
-  it("abre el link del proyecto para un índice válido", () => {
+  it("abre el link en vivo del proyecto para un índice válido", () => {
     const result = openCommand(["1"]);
     expect(window.open).toHaveBeenCalledWith(
-      PROJECTS[0].url,
+      projects[0].url,
       "_blank",
       "noopener,noreferrer",
     );
-    expect(result.output).toContain(PROJECTS[0].nombre);
+    expect(result.output).toContain(projects[0].name);
+  });
+
+  it("usa noopener,noreferrer al abrir el link", () => {
+    openCommand(["1"]);
+    const call = (window.open as unknown as { mock: { calls: unknown[][] } }).mock.calls[0];
+    expect(call[2]).toBe("noopener,noreferrer");
   });
 
   it("devuelve error para índice fuera de rango, sin llamar window.open", () => {

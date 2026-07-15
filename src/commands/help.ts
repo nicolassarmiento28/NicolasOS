@@ -8,7 +8,6 @@ const COMMANDS = [
   "projects",
   "open",
   "skills",
-  "experience",
   "resume",
   "contact",
   "github",

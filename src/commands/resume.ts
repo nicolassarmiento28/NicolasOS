@@ -1,10 +1,11 @@
 import type { CommandResult } from "./types";
+import { resumeUrl } from "../data/content";
 
-// ponytail: placeholder — URL real la define content en 04-contenido.md
-const RESUME_URL = "/cv.pdf";
-
-/** Abre/descarga el CV en una nueva pestaña. */
+/** Abre el CV en una nueva pestaña, o avisa si todavía no está disponible. */
 export function resumeCommand(_args: string[]): CommandResult {
-  window.open(RESUME_URL, "_blank", "noopener,noreferrer");
+  if (!resumeUrl) {
+    return { output: "CV no disponible todavía." };
+  }
+  window.open(resumeUrl, "_blank", "noopener,noreferrer");
   return { output: "Abriendo CV..." };
 }

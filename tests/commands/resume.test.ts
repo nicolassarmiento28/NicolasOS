@@ -6,13 +6,9 @@ describe("resumeCommand", () => {
     vi.stubGlobal("open", vi.fn());
   });
 
-  it("abre el CV en una nueva pestaña", () => {
+  it("no abre ningún link y avisa que el CV no está disponible (content.ts define resumeUrl como undefined)", () => {
     const result = resumeCommand([]);
-    expect(window.open).toHaveBeenCalledWith(
-      "/cv.pdf",
-      "_blank",
-      "noopener,noreferrer",
-    );
-    expect(result.output.length).toBeGreaterThan(0);
+    expect(window.open).not.toHaveBeenCalled();
+    expect(result.output).toBe("CV no disponible todavía.");
   });
 });

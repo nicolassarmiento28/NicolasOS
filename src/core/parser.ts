@@ -10,7 +10,6 @@ const ALIASES: Map<string, string> = new Map([
   ["ayuda", "help"],
   ["proyectos", "projects"],
   ["abrir", "open"],
-  ["experiencia", "experience"],
   ["cv", "resume"],
   ["contacto", "contact"],
   ["tema", "theme"],

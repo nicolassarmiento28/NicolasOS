@@ -1,6 +1,6 @@
 import type { CommandResult } from "./types";
+import { profile } from "../data/content";
 
-// ponytail: placeholder — bio real la define content en 04-contenido.md
 export function aboutCommand(_args: string[]): CommandResult {
-  return { output: "Desarrollador de software, construyendo NicolasOS." };
+  return { output: profile.bio };
 }

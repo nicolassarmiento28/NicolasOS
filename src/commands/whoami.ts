@@ -1,6 +1,6 @@
 import type { CommandResult } from "./types";
+import { profile } from "../data/content";
 
-// ponytail: placeholder — bio real la define content en 04-contenido.md
 export function whoamiCommand(_args: string[]): CommandResult {
-  return { output: "Nicolás Sarmiento — desarrollador" };
+  return { output: `${profile.name} — ${profile.title} (${profile.location})` };
 }

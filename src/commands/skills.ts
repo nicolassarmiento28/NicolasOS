@@ -1,17 +1,15 @@
 import type { CommandResult } from "./types";
+import { skills } from "../data/content";
 
-// ponytail: placeholder — skills reales las define content en 04-contenido.md
-const SKILLS = [
-  "TypeScript",
-  "JavaScript",
-  "React",
-  "Node.js",
-  "Vite",
-  "CSS",
-  "Git",
-];
-
-/** Lista de tecnologías (v1, placeholder). */
+/** Grid de tecnologías por categoría. */
 export function skillsCommand(_args: string[]): CommandResult {
-  return { output: SKILLS.join("\n") };
+  const frontend = skills.frontend.map((s) => s.name).join(", ");
+  const backend = skills.backend.map((s) => s.name).join(", ");
+  const ia = skills.ia.join(", ");
+  const output = [
+    `Frontend: ${frontend}`,
+    `Backend: ${backend}`,
+    `IA/agentes: ${ia}`,
+  ].join("\n");
+  return { output };
 }

@@ -9,6 +9,11 @@ describe("helpCommand", () => {
     expect(result.output).toContain("theme");
   });
 
+  it("no incluye el comando experience (eliminado, sin experiencia laboral)", () => {
+    const result = helpCommand([]);
+    expect(result.output).not.toMatch(/\bexperience\b/);
+  });
+
   it("ignora argumentos extra", () => {
     const result = helpCommand(["algo"]);
     expect(result.output).toContain("help");

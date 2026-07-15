@@ -1,9 +1,7 @@
 import type { CommandResult } from "./types";
+import { contact } from "../data/content";
 
-// ponytail: placeholder — datos reales los define content en 04-contenido.md
-const EMAIL = "contacto@ejemplo.com";
-
-/** Info de contacto (v1, placeholder). */
+/** Info de contacto. */
 export function contactCommand(_args: string[]): CommandResult {
-  return { output: `Email: ${EMAIL}` };
+  return { output: `Email: ${contact.email}` };
 }
