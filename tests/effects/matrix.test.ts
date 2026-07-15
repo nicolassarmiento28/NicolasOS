@@ -41,4 +41,29 @@ describe("matrix effect", () => {
     expect(isMatrixRunning()).toBe(false);
     expect(document.getElementById("matrix-canvas")).toBeNull();
   });
+
+  it("Escape detiene la animación aunque el overlay tape la pantalla", () => {
+    startMatrix();
+    expect(isMatrixRunning()).toBe(true);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+    expect(isMatrixRunning()).toBe(false);
+    expect(document.getElementById("matrix-canvas")).toBeNull();
+  });
+
+  it("no deja el listener de Escape colgado después de stopMatrix (sin fuga entre sesiones)", () => {
+    const addSpy = vi.spyOn(document, "addEventListener");
+    const removeSpy = vi.spyOn(document, "removeEventListener");
+
+    startMatrix();
+    stopMatrix();
+    startMatrix();
+    stopMatrix();
+
+    const adds = addSpy.mock.calls.filter((c) => c[0] === "keydown").length;
+    const removes = removeSpy.mock.calls.filter((c) => c[0] === "keydown").length;
+    expect(adds).toBe(2);
+    expect(removes).toBe(2);
+  });
 });

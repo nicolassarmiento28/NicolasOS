@@ -45,10 +45,20 @@ export function startMatrix(): void {
       }
       drops[i]++;
     }
+    // hint fijo: el canvas cubre la terminal, así que la salida tiene
+    // que quedar visible encima de la propia animación.
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "14px monospace";
+    ctx.fillText("Escape para salir", 12, canvas.height - 12);
     rafId = requestAnimationFrame(draw);
   }
 
   rafId = requestAnimationFrame(draw);
+  document.addEventListener("keydown", handleEscape);
+}
+
+function handleEscape(e: KeyboardEvent): void {
+  if (e.key === "Escape") stopMatrix();
 }
 
 /** Detiene la animación y limpia el canvas del DOM (no-op si no está corriendo). */
@@ -57,6 +67,7 @@ export function stopMatrix(): void {
     cancelAnimationFrame(rafId);
     rafId = null;
   }
+  document.removeEventListener("keydown", handleEscape);
   canvas?.remove();
   canvas = null;
 }
