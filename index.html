@@ -3,9 +3,126 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>NicolasOS</title>
+    <title>Nicolás Sarmiento — Full Stack Developer</title>
+    <meta
+      name="description"
+      content="Nicolás Sarmiento, Full Stack Developer especializado en React, TypeScript y Node.js, Viña del Mar, Chile."
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Nicolás Sarmiento — Full Stack Developer" />
+    <meta
+      property="og:description"
+      content="Full Stack Developer especializado en React, TypeScript y Node.js, con proyectos desplegados en producción integrando frontend, APIs REST, IA y paneles de administración."
+    />
+    <meta property="og:type" content="website" />
+    <!-- TODO: reemplazar por la URL real de producción cuando el usuario confirme el dominio en Vercel -->
+    <!-- <meta property="og:url" content="https://TODO.vercel.app/" /> -->
+    <!-- TODO: falta una imagen real (og:image) provista por el usuario -->
+    <!-- <meta property="og:image" content="/TODO-og-image.png" /> -->
   </head>
   <body>
+    <!--
+      SEO fallback estático (specs/05-seo-fallback.md): contenido real del
+      portafolio en el HTML fuente, leíble sin ejecutar JS. Duplica a mano
+      src/data/content.ts porque este proyecto no tiene SSR ni codegen en
+      build-time (ponytail: duplicación documentada, no un bug). Si
+      content.ts cambia, actualizar este bloque a mano.
+      Oculto visualmente: la terminal interactiva de #app se monta encima.
+    -->
+    <div id="seo-content" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">
+      <h1>Nicolás Sarmiento — Full Stack Developer</h1>
+      <p>Viña del Mar, Chile</p>
+      <p>
+        Full Stack Developer especializado en React, TypeScript y Node.js, con experiencia en el
+        desarrollo de aplicaciones web modernas y escalables. He desarrollado múltiples proyectos
+        desplegados en producción, integrando frontend interactivo, APIs REST, lógica backend,
+        paneles de administración y plataformas SaaS. Me enfoco en construir aplicaciones
+        mantenibles, escalables y orientadas a la experiencia de usuario, aplicando buenas
+        prácticas de desarrollo, arquitectura de software y tecnologías modernas. Además, utilizo
+        herramientas basadas en inteligencia artificial, LLMs y agentes de IA para optimizar
+        flujos de trabajo, acelerar el desarrollo de software y mejorar la productividad.
+        Actualmente busco seguir desarrollándome profesionalmente dentro del área de tecnologías
+        de la información, contribuyendo al desarrollo de soluciones innovadoras y de alto
+        impacto.
+      </p>
+
+      <h2>Proyectos</h2>
+      <ul>
+        <li>
+          <h3>SaasChatbot IA</h3>
+          <p>
+            Plataforma SaaS para Creación de Chatbots Inteligentes. Aplicación SaaS desarrollada
+            siguiendo la metodología Spec Driven Development, diseñada para que empresas puedan
+            crear e implementar chatbots de atención al cliente impulsados por inteligencia
+            artificial en cuestión de minutos. La plataforma incorpora autenticación segura,
+            gestión de usuarios, comunicación en tiempo real e integración con modelos de lenguaje
+            para ofrecer conversaciones naturales y escalables.
+          </p>
+          <p>Stack: React, Vite, Supabase, Groq API, Ant Design, TypeScript</p>
+          <a href="https://saaschatbotia.vercel.app/">https://saaschatbotia.vercel.app/</a>
+        </li>
+        <li>
+          <h3>Dashboard Analítico de Wrestling</h3>
+          <p>
+            Dashboard interactivo desarrollado para comparar métricas y visualización de datos
+            entre WWE y AEW mediante una interfaz moderna y responsive.
+          </p>
+          <p>Stack: React, Node.js, Vite, JavaScript</p>
+          <a href="https://dashboard-comparativo-wwe-aew.vercel.app/">https://dashboard-comparativo-wwe-aew.vercel.app/</a>
+        </li>
+        <li>
+          <h3>PetShop SPA + Webpay</h3>
+          <p>
+            E-commerce de mascotas tipo SPA con catálogo de productos, carrito de compras, pago
+            integrado con Transbank Webpay Plus y Panel de administración incluido.
+          </p>
+          <p>Stack: React, Node.js, PostgreSQL, JavaScript</p>
+          <a href="https://petshop-e-commerce.vercel.app/">https://petshop-e-commerce.vercel.app/</a>
+        </li>
+        <li>
+          <h3>VG Collection</h3>
+          <p>
+            Single Page Application con React y TypeScript para gestionar una colección personal
+            de videojuegos, con integración a la API de IGDB, identidad visual retro-arcade y modo
+            oscuro por defecto.
+          </p>
+          <p>Stack: React, TypeScript, Vite, Ant Design, React Router</p>
+          <a href="https://vg-collection-eight.vercel.app/">https://vg-collection-eight.vercel.app/</a>
+        </li>
+        <li>
+          <h3>CineList</h3>
+          <p>
+            Aplicación web desarrollada con React que permite explorar el catálogo de TMDb,
+            buscar películas en tiempo real, filtrarlas por categoría y guardar favoritos con
+            autenticación de Google.
+          </p>
+          <p>Stack: React, Vite, JavaScript</p>
+          <a href="https://buscador-peliculas-react-ten.vercel.app/">https://buscador-peliculas-react-ten.vercel.app/</a>
+        </li>
+        <li>
+          <h3>Space Runner</h3>
+          <p>
+            Juego web interactivo desarrollado con JavaScript, HTML5 y CSS3 enfocado en lógica de
+            juego, renderizado dinámico y experiencia arcade en navegador, con mecánicas
+            interactivas y control de eventos en tiempo real.
+          </p>
+          <p>Stack: HTML5 Canvas, JavaScript, Web Audio API, CSS3</p>
+          <a href="https://space-runner-theta.vercel.app/">https://space-runner-theta.vercel.app/</a>
+        </li>
+      </ul>
+
+      <h2>Skills</h2>
+      <p>Frontend: React, TypeScript, Vite, JavaScript, HTML5</p>
+      <p>Backend: Node.js, SQL</p>
+      <p>IA/Agentes: LLMs, AI Agents, Spec-Driven Development, Claude Code</p>
+
+      <h2>Contacto</h2>
+      <p>Email: nicolas.sarmiento.jimenez@gmail.com</p>
+      <a href="https://github.com/nicolassarmiento28">https://github.com/nicolassarmiento28</a>
+      <a href="https://www.linkedin.com/in/nicolas-sarmiento-303327265/">https://www.linkedin.com/in/nicolas-sarmiento-303327265/</a>
+    </div>
+
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
