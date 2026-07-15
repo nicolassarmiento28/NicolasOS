@@ -16,10 +16,14 @@
       content="Full Stack Developer especializado en React, TypeScript y Node.js, con proyectos desplegados en producción integrando frontend, APIs REST, IA y paneles de administración."
     />
     <meta property="og:type" content="website" />
-    <!-- TODO: reemplazar por la URL real de producción cuando el usuario confirme el dominio en Vercel -->
-    <!-- <meta property="og:url" content="https://TODO.vercel.app/" /> -->
-    <!-- TODO: falta una imagen real (og:image) provista por el usuario -->
-    <!-- <meta property="og:image" content="/TODO-og-image.png" /> -->
+    <meta property="og:url" content="https://ns-dev-five.vercel.app/" />
+    <meta property="og:image" content="https://ns-dev-five.vercel.app/og-image.png" />
+
+    <!-- CSP básica (specs/08-seguridad.md): sin scripts/estilos externos, sin fetch a APIs externas -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'self';"
+    />
   </head>
   <body>
     <!--
