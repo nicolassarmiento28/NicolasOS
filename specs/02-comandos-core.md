@@ -32,6 +32,18 @@ que estaba antes de resetear).
 espacios extra, mayúsculas y comandos vacíos. `history.ts` tiene test de
 navegación en ambas direcciones y de reset.
 
+## Registro central de comandos — fuente única de verdad
+Existe UN solo registro de comandos (`src/core/registry.ts`): un mapa
+`nombre → handler`. `main.ts` lo usa para despachar, y `help.ts` lo usa
+para generar la lista de chips — nunca una lista hardcodeada aparte.
+Agregar un comando nuevo significa agregar UNA entrada a ese registro;
+si `help` no lo muestra automáticamente después de eso, es un bug de
+`help.ts`, no algo a resolver copiando el nombre a una segunda lista.
+
+**Criterio de aceptación**: un test que registra un comando ficticio en
+el registro y confirma que `helpCommand()` lo incluye sin tocar
+`help.ts` — prueba que no hay una lista duplicada por mantener a mano.
+
 ## Comandos v1
 **Nota:** no existe comando `experience`/`experiencia`. El usuario confirmó
 que no tiene experiencia laboral formal — ver `04-contenido.md`. No agregar

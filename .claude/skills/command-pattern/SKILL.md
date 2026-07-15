@@ -31,13 +31,22 @@ export function <nombreComando>(args: string[]): CommandResult {
 
 ## Alias en español — obligatorio
 
-Cada comando se registra con su alias en `src/core/registry.ts` (o el archivo
-equivalente de registro central), nunca hardcodeado dentro del propio módulo
-del comando:
+Cada comando se registra con su alias en `src/core/registry.ts`, nunca
+hardcodeado dentro del propio módulo del comando:
 
 ```typescript
 { en: "projects", es: "proyectos", handler: projectsCommand }
 ```
+
+## Registro central — una sola fuente de verdad
+
+`src/core/registry.ts` es EL único lugar donde vive el mapa
+`nombre → handler`. `main.ts` lo importa para despachar comandos, y
+`help.ts` lo importa para generar la lista de chips. Nunca crear una
+segunda lista de nombres de comandos en otro archivo (ver
+specs/02-comandos-core.md) — si `help` no refleja un comando nuevo, el
+bug está en `help.ts` leyendo de otro lado, no en olvidarse de copiar
+el nombre a mano.
 
 ## Manejo de errores dentro de un comando
 

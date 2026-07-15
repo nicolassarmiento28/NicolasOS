@@ -2,52 +2,12 @@ import "./style.css";
 import { parseInput } from "./core/parser";
 import { History } from "./core/history";
 import type { CommandResult } from "./commands/types";
-import { helpCommand } from "./commands/help";
-import { whoamiCommand } from "./commands/whoami";
-import { aboutCommand } from "./commands/about";
-import { projectsCommand } from "./commands/projects";
-import { openCommand } from "./commands/open";
-import { skillsCommand } from "./commands/skills";
-import { resumeCommand } from "./commands/resume";
-import { contactCommand } from "./commands/contact";
-import { githubCommand } from "./commands/github";
-import { linkedinCommand } from "./commands/linkedin";
-import { themeCommand } from "./commands/theme";
-import { clearCommand } from "./commands/clear";
 import { historyCommand } from "./commands/history";
-import { sudoCommand } from "./commands/sudo";
-import { matrixCommand } from "./commands/matrix";
-import { musicCommand } from "./commands/music";
-import { statsCommand } from "./commands/stats";
+import { COMMANDS, COMMAND_NAMES } from "./core/registry";
 import { THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
 import { Analytics } from "./core/analytics";
 import { profile, projects, skills, contact } from "./data/content";
-
-// registro de comandos: firma estándar (args) => CommandResult, según
-// src/commands/types.ts. "history" es el único caso especial (necesita la
-// sesión), se resuelve aparte en runCommand.
-const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
-  help: helpCommand,
-  whoami: whoamiCommand,
-  about: aboutCommand,
-  projects: projectsCommand,
-  open: openCommand,
-  skills: skillsCommand,
-  resume: resumeCommand,
-  contact: contactCommand,
-  github: githubCommand,
-  linkedin: linkedinCommand,
-  theme: themeCommand,
-  clear: clearCommand,
-  sudo: sudoCommand,
-  matrix: matrixCommand,
-  music: musicCommand,
-  stats: statsCommand,
-};
-
-// nombres de comandos reales, usados para sugerencias de typo (ver src/core/suggest.ts)
-const COMMAND_NAMES = [...Object.keys(COMMANDS), "history"];
 
 const history = new History();
 
