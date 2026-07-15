@@ -67,7 +67,7 @@ function runCommand(raw: string): CommandResult {
   if (cmd === "history") return historyCommand(args, history.list());
   const handler = COMMANDS[cmd];
   if (!handler) {
-    return { output: `Comando no encontrado: ${cmd}. Escribí "help" para ver la lista.` };
+    return { output: `Comando no encontrado: ${cmd}. Escribe "help" para ver la lista.` };
   }
   return handler(args);
 }
@@ -100,4 +100,4 @@ input.addEventListener("keydown", (e) => {
 app.addEventListener("click", () => input.focus());
 input.focus();
 
-printLine('NicolasOS — escribí "help" para ver los comandos disponibles.');
+printLine('NicolasOS — escribe "help" para ver los comandos disponibles.');
