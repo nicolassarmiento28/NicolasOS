@@ -18,8 +18,10 @@ import { historyCommand } from "./commands/history";
 import { sudoCommand } from "./commands/sudo";
 import { matrixCommand } from "./commands/matrix";
 import { musicCommand } from "./commands/music";
+import { statsCommand } from "./commands/stats";
 import { THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
+import { Analytics } from "./core/analytics";
 import { profile, projects, skills, contact } from "./data/content";
 
 // registro de comandos: firma estándar (args) => CommandResult, según
@@ -41,6 +43,7 @@ const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
   sudo: sudoCommand,
   matrix: matrixCommand,
   music: musicCommand,
+  stats: statsCommand,
 };
 
 // nombres de comandos reales, usados para sugerencias de typo (ver src/core/suggest.ts)
@@ -81,11 +84,15 @@ function printLine(text: string, className = "", html = false): void {
 function runCommand(raw: string): CommandResult {
   const { cmd, args } = parseInput(raw);
   if (!cmd) return { output: "" };
-  if (cmd === "history") return historyCommand(args, history.list());
+  if (cmd === "history") {
+    Analytics.track(cmd);
+    return historyCommand(args, history.list());
+  }
   const handler = COMMANDS[cmd];
   if (!handler) {
     return { output: unknownCommandMessage(cmd, Object.keys(THEMES), COMMAND_NAMES) };
   }
+  Analytics.track(cmd);
   return handler(args);
 }
 
