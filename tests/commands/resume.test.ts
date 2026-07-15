@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { resumeCommand } from "../../src/commands/resume";
+import { resumeUrl } from "../../src/data/content";
 
 describe("resumeCommand", () => {
   beforeEach(() => {
     vi.stubGlobal("open", vi.fn());
   });
 
-  it("no abre ningún link y avisa que el CV no está disponible (content.ts define resumeUrl como undefined)", () => {
+  it("abre el CV en una nueva pestaña con noopener,noreferrer (content.ts define resumeUrl)", () => {
     const result = resumeCommand([]);
-    expect(window.open).not.toHaveBeenCalled();
-    expect(result.output).toBe("CV no disponible todavía.");
+    expect(window.open).toHaveBeenCalledWith(resumeUrl, "_blank", "noopener,noreferrer");
+    expect(result.output).toBe("Abriendo CV...");
   });
 });

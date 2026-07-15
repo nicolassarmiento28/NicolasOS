@@ -50,8 +50,7 @@ export const contact: ContactInfo = {
   linkedin: "https://www.linkedin.com/in/nicolas-sarmiento-303327265/",
 };
 
-// CV: no provisto todavía por el usuario. No inventar un link falso.
-export const resumeUrl: string | undefined = undefined;
+export const resumeUrl: string | undefined = "/CV_Nicolas_Sarmiento.pdf";
 
 export const projects: Project[] = [
   {
