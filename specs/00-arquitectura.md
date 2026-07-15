@@ -33,7 +33,26 @@ CLAUDE.md       contexto corto que se carga en cada sesión
 - `06-effects-v2.md` — matrix, music, temas extra (bloqueado hasta cerrar el resto)
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal a todo
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal a todo
-- `09-herramientas.md` — MCPs y plugins que se usan siempre en el proyecto
+
+## Tabla dominio → agente dueño
+Antes de asignar cualquier tarea, confirmar acá el dueño — evita que un
+subagente reciba trabajo fuera de su `alcance` declarado.
+
+| spec de dominio | agente dueño |
+|---|---|
+| 01-onboarding-ux.md | onboarding-ux |
+| 02-comandos-core.md | core-engine |
+| 03-temas.md | themes |
+| 04-contenido.md | content |
+| 05-seo-fallback.md | onboarding-ux (misma superficie de contenido que la vista fallback) |
+| 06-effects-v2.md | core-engine (mismo dueño del motor; criterio de aceptación de matrix/music es no romper parser/historial) |
+| 07-qa-testing.md | qa-testing (transversal) |
+| 08-seguridad.md | seguridad (transversal) |
+| build/deploy | devops |
+
+Si `orchestrator` (o cualquier agente) no encuentra dueño claro para una
+tarea en esta tabla, debe preguntarle al usuario antes de asignarla a
+cualquiera "por descarte" — no improvisar un dueño.
 
 ## Convenciones de código
 - Cada comando de terminal es un módulo independiente y testeable, con la
@@ -54,4 +73,4 @@ CLAUDE.md       contexto corto que se carga en cada sesión
 
 ## No tocar
 - Config/deploy de Vercel — lo maneja el usuario.
-- `src/effects/` hasta que 06-effects-v2.md esté habilitado explícitamente.
+- `src/effects/` hasta que 06-effects-v2.md esté habilitado explícitamente (ya lo está: bloque 01-05/07/08 cerrado, dueño core-engine).
