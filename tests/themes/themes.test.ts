@@ -19,7 +19,7 @@ describe("applyTheme", () => {
 
   it("devuelve false y no cambia el tema activo ante un nombre inválido", () => {
     applyTheme("linux");
-    const ok = applyTheme("windows-xp");
+    const ok = applyTheme("commodore-64");
     expect(ok).toBe(false);
     expect(getCurrentTheme()).toBe("linux");
   });

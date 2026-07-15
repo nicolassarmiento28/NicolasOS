@@ -33,6 +33,21 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Consolas', monospace",
     titlebar: "#ffffff",
   },
+  "windows-xp": {
+    bg: "#ece9d8",
+    text: "#000000",
+    accent: "#0a246a",
+    font: "'Tahoma', sans-serif",
+    titlebar:
+      "linear-gradient(180deg, #3a6ea5 0%, #1c4d9e 50%, #0a246a 100%)",
+  },
+  hacker: {
+    bg: "#000000",
+    text: "#00ff41",
+    accent: "#00ff41",
+    font: "'Courier New', monospace",
+    titlebar: "#001a00",
+  },
 };
 
 export const DEFAULT_THEME = "cyberpunk";

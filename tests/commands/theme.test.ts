@@ -12,6 +12,20 @@ describe("themeCommand", () => {
     expect(result.output).toContain("cyberpunk");
     expect(result.output).toContain("linux");
     expect(result.output).toContain("dos");
+    expect(result.output).toContain("windows-xp");
+    expect(result.output).toContain("hacker");
+  });
+
+  it("theme windows-xp aplica las variables CSS del tema", () => {
+    const result = themeCommand(["windows-xp"]);
+    expect(result.output).toContain("windows-xp");
+    expect(document.documentElement.style.getPropertyValue("--theme-accent")).toBe("#0a246a");
+  });
+
+  it("theme hacker aplica las variables CSS del tema", () => {
+    const result = themeCommand(["hacker"]);
+    expect(result.output).toContain("hacker");
+    expect(document.documentElement.style.getPropertyValue("--theme-text")).toBe("#00ff41");
   });
 
   it("theme <n> aplica las variables CSS del tema y confirma el cambio", () => {
@@ -36,7 +50,7 @@ describe("themeCommand", () => {
   });
 
   it("informa error con un nombre de tema inválido, sin lanzar excepción", () => {
-    const result = themeCommand(["windows-xp"]);
+    const result = themeCommand(["commodore-64"]);
     expect(result.output).toContain("no encontrado");
   });
 });
