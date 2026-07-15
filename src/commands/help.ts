@@ -1,7 +1,7 @@
 import type { CommandResult } from "./types";
 
-// ponytail: lista de texto plano; chips tappeables son tarea de 01-onboarding-ux.md
-const COMMANDS = [
+// lista de comandos disponibles (v1)
+export const COMMANDS = [
   "help",
   "whoami",
   "about",
@@ -18,7 +18,10 @@ const COMMANDS = [
   "sudo",
 ];
 
-/** Lista los comandos disponibles (v1). */
+/** Lista los comandos disponibles como chips tappeables (spec 01-onboarding-ux.md). */
 export function helpCommand(_args: string[]): CommandResult {
-  return { output: COMMANDS.join("\n") };
+  const chips = COMMANDS.map(
+    (c) => `<button type="button" class="chip" data-cmd="${c}">${c}</button>`,
+  ).join(" ");
+  return { output: chips, html: true };
 }

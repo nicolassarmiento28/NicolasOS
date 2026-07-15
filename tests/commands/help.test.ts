@@ -18,4 +18,11 @@ describe("helpCommand", () => {
     const result = helpCommand(["algo"]);
     expect(result.output).toContain("help");
   });
+
+  it("devuelve chips tappeables con data-cmd por comando", () => {
+    const result = helpCommand([]);
+    expect(result.html).toBe(true);
+    expect(result.output).toContain('data-cmd="projects"');
+    expect(result.output).toContain('data-cmd="theme"');
+  });
 });
