@@ -1,8 +1,8 @@
 # 06-effects-v2.md
 
-> BLOQUEADO. No empezar ninguna tarea de este documento hasta que
-> 01, 02, 03, 04, 05 y 07 estén completos: módulos implementados,
-> tests pasando, commits hechos.
+> DESBLOQUEADO. 01, 02, 03, 04, 05, 07 y 08 están completos.
+> Temas 4 y 5 y `matrix` ya implementados y aprobados (ver
+> specs/03-temas.md). Queda pendiente: `music` y analítica de comandos.
 
 ## Objetivo
 Sumar las features más "cosméticas" y de mayor riesgo de UX una vez que
