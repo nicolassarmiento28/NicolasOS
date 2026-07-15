@@ -3,12 +3,18 @@
 ## Objetivo
 Sistema de temas visuales activables con el comando `theme <n>`.
 
-## Temas v1 (recortado a 3 para bajar carga de QA)
+## Temas v1
 1. cyberpunk — negro + magenta/cian neón
 2. linux — TTY verde clásico
 3. dos — negro/blanco, cursor de bloque
+4. windows-xp — gris/azul clásico, tipografía Tahoma
+5. hacker — negro/verde, tipografía Courier New
 
-Temas 4 (windows xp) y 5 (hacker) quedan en `06-effects-v2.md`.
+Temas 4 y 5 se adelantaron e implementaron en `src/themes/themes.ts` junto
+con los primeros 3 (commit `6724076`), validados por `qa-testing` y
+`seguridad` — se promueven formalmente a v1 acá en vez de revertirlos.
+`06-effects-v2.md` sigue bloqueado para el resto de su alcance (music,
+analítica de comandos).
 
 ## Implementación
 - Cada tema es un objeto de tokens en `src/themes/themes.ts` (bg, texto,
