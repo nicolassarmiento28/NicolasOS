@@ -28,11 +28,32 @@ describe("applyTheme", () => {
     expect(THEMES.linux.chipRadius).toBe("sharp");
     expect(THEMES.linux.showTitlebarDots).toBe(false);
     expect(THEMES.linux.crt).toBe(false);
+    expect(THEMES.linux.flicker).toBe(false);
+    expect(THEMES.linux.ambientRain).toBe(false);
+    expect(THEMES.linux.cursorStyle).toBe("blink");
 
-    // hacker (v2, bloqueado): efecto máximo
-    expect(THEMES.hacker.glowIntensity).toBe("strong");
-    expect(THEMES.hacker.scanlinesIntensity).toBe("visible");
+    // hacker (specs/06-effects-v2.md): efecto máximo, MÁS elementos que linux
+    // no tiene en absoluto (flicker, cursor "breathe", lluvia ambiental).
+    expect(THEMES.hacker.glowIntensity).toBe("intense");
+    expect(THEMES.hacker.scanlinesIntensity).toBe("intense");
     expect(THEMES.hacker.showTitlebarDots).toBe(true);
+    expect(THEMES.hacker.flicker).toBe(true);
+    expect(THEMES.hacker.ambientRain).toBe(true);
+    expect(THEMES.hacker.cursorStyle).toBe("breathe");
+  });
+
+  it("hacker aplica flicker y cursorStyle como data attributes en documentElement", () => {
+    applyTheme("hacker");
+    const root = document.documentElement;
+    expect(root.dataset.themeFlicker).toBe("1");
+    expect(root.dataset.cursorStyle).toBe("breathe");
+    expect(root.style.getPropertyValue("--theme-glow-2")).toBe("12px");
+    expect(root.style.getPropertyValue("--theme-chip-hover-glow")).toBe("20px");
+
+    applyTheme("linux");
+    expect(root.dataset.themeFlicker).toBe("0");
+    expect(root.dataset.cursorStyle).toBe("blink");
+    expect(root.style.getPropertyValue("--theme-glow-2")).toBe("0px");
   });
 
   it("devuelve false y no cambia el tema activo ante un nombre inválido", () => {

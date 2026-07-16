@@ -7,6 +7,11 @@
   --theme-titlebar-text: #f0f0f0;
   --theme-crt: 1;
   --theme-glow: 8px;
+  /* segunda capa de text-shadow (halo real de 2 capas) y anillo de hover de
+     chips — 0px/igual a --theme-glow por default, no-cero solo en temas
+     "intense" como hacker (specs/06-effects-v2.md). Ver src/themes/themes.ts. */
+  --theme-glow-2: 0px;
+  --theme-chip-hover-glow: 8px;
   --theme-scanlines-opacity: 0.035;
   --theme-chip-radius: 999px;
   --theme-titlebar-dots: flex;
@@ -32,8 +37,12 @@ body {
 #input-line #prompt {
   color: var(--theme-accent);
   /* phosphor: sombra sutil del acento del tema (specs/10-diseno-visual.md).
-     Intensidad controlada por --theme-glow (0px en temas austeros como linux). */
-  text-shadow: 0 0 var(--theme-glow) var(--theme-accent);
+     Intensidad controlada por --theme-glow (0px en temas austeros como linux).
+     --theme-glow-2 agrega una segunda capa (halo real, no solo más blur) en
+     temas "intense" como hacker — 0px en el resto, no cambia nada visible. */
+  text-shadow:
+    0 0 var(--theme-glow) var(--theme-accent),
+    0 0 var(--theme-glow-2) var(--theme-accent);
 }
 
 /* cursor de bloque parpadeante, color de acento del tema activo */
@@ -49,6 +58,63 @@ body {
 @keyframes cursor-blink {
   50% {
     opacity: 0;
+  }
+}
+
+/* Cursor "respiración" (specs/06-effects-v2.md, tema hacker): pulso de glow en
+   vez de blink on/off. Activado por --theme-cursor-style vía data attribute
+   (dataset.cursorStyle en applyTheme), no por nombre de tema hardcodeado. */
+[data-cursor-style="breathe"] #cursor {
+  animation: cursor-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes cursor-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 2px var(--theme-accent);
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 14px 4px var(--theme-accent);
+  }
+}
+
+/* Flicker sutil (specs/06-effects-v2.md, tema hacker): parpadeo aleatorio muy
+   leve de opacidad cada pocos segundos, efecto CRT viejo — algo que linux no
+   tiene en absoluto. Gateado por [data-theme-flicker], no por nombre de tema. */
+[data-theme-flicker="1"] #terminal {
+  animation: theme-flicker 6s infinite;
+}
+
+@keyframes theme-flicker {
+  0%,
+  96%,
+  100% {
+    opacity: 1;
+  }
+  97% {
+    opacity: 0.82;
+  }
+  98% {
+    opacity: 1;
+  }
+  99% {
+    opacity: 0.9;
+  }
+}
+
+/* accesibilidad: apagar las animaciones nuevas (flicker, cursor breathe) si el
+   usuario prefiere menos movimiento — la lluvia ambiental ni siquiera arranca
+   (ver src/themes/ambientRain.ts). El blink normal de #cursor se mantiene, no
+   es una animación nueva. */
+@media (prefers-reduced-motion: reduce) {
+  [data-theme-flicker="1"] #terminal {
+    animation: none;
+  }
+
+  [data-cursor-style="breathe"] #cursor {
+    animation: cursor-blink 1s step-end infinite;
   }
 }
 
@@ -146,7 +212,9 @@ body {
 
 .ascii-banner {
   color: var(--theme-accent);
-  text-shadow: 0 0 var(--theme-glow) var(--theme-accent);
+  text-shadow:
+    0 0 var(--theme-glow) var(--theme-accent),
+    0 0 var(--theme-glow-2) var(--theme-accent);
   font-size: 0.7rem;
   /* pre + line-height 1-1.1: sin esto el ASCII art se superpone entre
      líneas (specs/10-diseno-visual.md, bug conocido). Explícito acá en vez
@@ -228,7 +296,10 @@ body {
   background: var(--theme-accent);
   color: var(--theme-bg);
   transform: translateY(-1px);
-  box-shadow: 0 0 var(--theme-glow) var(--theme-accent);
+  /* anillo de hover: --theme-chip-hover-glow (no --theme-glow) para que temas
+     "intense" como hacker tengan un blur bien visible sin inflar el resto del
+     texto (specs/06-effects-v2.md). */
+  box-shadow: 0 0 var(--theme-chip-hover-glow) var(--theme-accent);
 }
 
 .chip:active {
