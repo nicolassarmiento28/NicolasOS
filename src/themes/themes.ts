@@ -14,9 +14,34 @@ export interface ThemeTokens {
    * de texto del cuerpo (ej. tema "dos": titlebar blanca, texto blanco) —
    * ver bug conocido "titlebar incompleto" en specs/10-diseno-visual.md. */
   titlebarText: string;
-  /** Efecto CRT (scanlines + viñeta), sólo para temas tipo terminal (specs/10-diseno-visual.md). */
+  /** Efecto CRT (viñeta), sólo para temas tipo terminal (specs/10-diseno-visual.md). */
   crt: boolean;
+  /** Intensidad de glow/text-shadow (prompt, banner, chips en hover). Ver specs/03-temas.md. */
+  glowIntensity: "none" | "subtle" | "strong";
+  /** Intensidad de las scanlines (separado de `crt`/viñeta). Ver specs/03-temas.md. */
+  scanlinesIntensity: "none" | "subtle" | "visible";
+  /** Radio de borde de los chips. "sharp" = TTY austera, "rounded" = pill. */
+  chipRadius: "sharp" | "rounded";
+  /** Puntos de colores (rojo/amarillo/verde) en la titlebar. false = barra simple sin cromo (TTY real). */
+  showTitlebarDots: boolean;
 }
+
+const GLOW_PX: Record<ThemeTokens["glowIntensity"], string> = {
+  none: "0px",
+  subtle: "4px",
+  strong: "8px",
+};
+
+const SCANLINES_OPACITY: Record<ThemeTokens["scanlinesIntensity"], string> = {
+  none: "0",
+  subtle: "0.015",
+  visible: "0.035",
+};
+
+const CHIP_RADIUS: Record<ThemeTokens["chipRadius"], string> = {
+  sharp: "0",
+  rounded: "999px",
+};
 
 export const THEMES: Record<string, ThemeTokens> = {
   cyberpunk: {
@@ -27,6 +52,10 @@ export const THEMES: Record<string, ThemeTokens> = {
     titlebar: "linear-gradient(90deg, #ff00ff, #00ffff)",
     titlebarText: "#f0f0f0",
     crt: true,
+    glowIntensity: "strong",
+    scanlinesIntensity: "visible",
+    chipRadius: "rounded",
+    showTitlebarDots: true,
   },
   linux: {
     bg: "#000000",
@@ -35,7 +64,11 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Courier New', monospace",
     titlebar: "#1a1a1a",
     titlebarText: "#33ff33",
-    crt: true,
+    crt: false,
+    glowIntensity: "none",
+    scanlinesIntensity: "none",
+    chipRadius: "sharp",
+    showTitlebarDots: false,
   },
   dos: {
     bg: "#000000",
@@ -45,6 +78,10 @@ export const THEMES: Record<string, ThemeTokens> = {
     titlebar: "#ffffff",
     titlebarText: "#000000",
     crt: true,
+    glowIntensity: "none",
+    scanlinesIntensity: "none",
+    chipRadius: "sharp",
+    showTitlebarDots: true,
   },
   "windows-xp": {
     bg: "#ece9d8",
@@ -55,7 +92,13 @@ export const THEMES: Record<string, ThemeTokens> = {
       "linear-gradient(180deg, #3a6ea5 0%, #1c4d9e 50%, #0a246a 100%)",
     titlebarText: "#ffffff",
     crt: false,
+    glowIntensity: "none",
+    scanlinesIntensity: "none",
+    chipRadius: "sharp",
+    showTitlebarDots: true,
   },
+  // ponytail: hacker queda con tokens razonables pero está bloqueado hasta
+  // 06-effects-v2.md — no ajustar sin abrir esa fase.
   hacker: {
     bg: "#000000",
     text: "#00ff41",
@@ -64,6 +107,10 @@ export const THEMES: Record<string, ThemeTokens> = {
     titlebar: "#001a00",
     titlebarText: "#00ff41",
     crt: true,
+    glowIntensity: "strong",
+    scanlinesIntensity: "visible",
+    chipRadius: "rounded",
+    showTitlebarDots: true,
   },
 };
 
@@ -83,6 +130,16 @@ export function applyTheme(name: string): boolean {
   root.style.setProperty("--theme-titlebar", tokens.titlebar);
   root.style.setProperty("--theme-titlebar-text", tokens.titlebarText);
   root.style.setProperty("--theme-crt", tokens.crt ? "1" : "0");
+  root.style.setProperty("--theme-glow", GLOW_PX[tokens.glowIntensity]);
+  root.style.setProperty(
+    "--theme-scanlines-opacity",
+    SCANLINES_OPACITY[tokens.scanlinesIntensity],
+  );
+  root.style.setProperty("--theme-chip-radius", CHIP_RADIUS[tokens.chipRadius]);
+  root.style.setProperty(
+    "--theme-titlebar-dots",
+    tokens.showTitlebarDots ? "flex" : "none",
+  );
   currentTheme = name;
   return true;
 }

@@ -15,15 +15,24 @@ describe("applyTheme", () => {
       expect(root.style.getPropertyValue("--theme-accent")).toBe(tokens.accent);
       expect(root.style.getPropertyValue("--theme-titlebar")).toBe(tokens.titlebar);
       expect(root.style.getPropertyValue("--theme-crt")).toBe(tokens.crt ? "1" : "0");
+      expect(root.style.getPropertyValue("--theme-titlebar-dots")).toBe(
+        tokens.showTitlebarDots ? "flex" : "none",
+      );
     }
   });
 
-  it("solo los temas tipo terminal (cyberpunk, linux, dos, hacker) llevan CRT", () => {
-    expect(THEMES.cyberpunk.crt).toBe(true);
-    expect(THEMES.linux.crt).toBe(true);
-    expect(THEMES.dos.crt).toBe(true);
-    expect(THEMES.hacker.crt).toBe(true);
-    expect(THEMES["windows-xp"].crt).toBe(false);
+  it("linux y hacker se distinguen visualmente (no solo tono de verde)", () => {
+    // linux: austero, sin glow/scanlines/dots, chips rectos (specs/03-temas.md)
+    expect(THEMES.linux.glowIntensity).toBe("none");
+    expect(THEMES.linux.scanlinesIntensity).toBe("none");
+    expect(THEMES.linux.chipRadius).toBe("sharp");
+    expect(THEMES.linux.showTitlebarDots).toBe(false);
+    expect(THEMES.linux.crt).toBe(false);
+
+    // hacker (v2, bloqueado): efecto máximo
+    expect(THEMES.hacker.glowIntensity).toBe("strong");
+    expect(THEMES.hacker.scanlinesIntensity).toBe("visible");
+    expect(THEMES.hacker.showTitlebarDots).toBe(true);
   });
 
   it("devuelve false y no cambia el tema activo ante un nombre inválido", () => {

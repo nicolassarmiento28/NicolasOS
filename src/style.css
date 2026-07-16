@@ -6,6 +6,10 @@
   --theme-titlebar: linear-gradient(90deg, #ff00ff, #00ffff);
   --theme-titlebar-text: #f0f0f0;
   --theme-crt: 1;
+  --theme-glow: 8px;
+  --theme-scanlines-opacity: 0.035;
+  --theme-chip-radius: 999px;
+  --theme-titlebar-dots: flex;
   --dim: rgba(255, 255, 255, 0.5);
 }
 
@@ -27,8 +31,9 @@ body {
 
 #input-line #prompt {
   color: var(--theme-accent);
-  /* phosphor: sombra sutil del acento del tema (specs/10-diseno-visual.md) */
-  text-shadow: 0 0 4px var(--theme-accent);
+  /* phosphor: sombra sutil del acento del tema (specs/10-diseno-visual.md).
+     Intensidad controlada por --theme-glow (0px en temas austeros como linux). */
+  text-shadow: 0 0 var(--theme-glow) var(--theme-accent);
 }
 
 /* cursor de bloque parpadeante, color de acento del tema activo */
@@ -68,7 +73,7 @@ body {
 }
 
 .traffic-lights {
-  display: flex;
+  display: var(--theme-titlebar-dots);
   gap: 0.4rem;
 }
 
@@ -111,7 +116,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: calc(var(--theme-crt) * 0.025);
+  opacity: var(--theme-scanlines-opacity);
   background: repeating-linear-gradient(
     to bottom,
     #000 0px,
@@ -141,7 +146,7 @@ body {
 
 .ascii-banner {
   color: var(--theme-accent);
-  text-shadow: 0 0 8px var(--theme-accent);
+  text-shadow: 0 0 var(--theme-glow) var(--theme-accent);
   font-size: 0.7rem;
   /* pre + line-height 1-1.1: sin esto el ASCII art se superpone entre
      líneas (specs/10-diseno-visual.md, bug conocido). Explícito acá en vez
@@ -207,7 +212,7 @@ body {
   padding: 0.15rem 0.6rem;
   background: transparent;
   border: 1px solid var(--theme-accent);
-  border-radius: 999px;
+  border-radius: var(--theme-chip-radius);
   color: var(--theme-accent);
   font: inherit;
   cursor: pointer;
@@ -223,7 +228,7 @@ body {
   background: var(--theme-accent);
   color: var(--theme-bg);
   transform: translateY(-1px);
-  box-shadow: 0 0 10px var(--theme-accent);
+  box-shadow: 0 0 var(--theme-glow) var(--theme-accent);
 }
 
 .chip:active {
