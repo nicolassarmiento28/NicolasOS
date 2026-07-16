@@ -1,8 +1,9 @@
 # 06-effects-v2.md
 
-> DESBLOQUEADO. 01, 02, 03, 04, 05, 07 y 08 están completos.
-> Temas 4 y 5 y `matrix` ya implementados y aprobados (ver
-> specs/03-temas.md). Queda pendiente: `music` y analítica de comandos.
+> CERRADO. 01, 02, 03, 04, 05, 07 y 08 están completos.
+> Temas 4 y 5, `matrix`, `music` y analítica de comandos ya
+> implementados, testeados (109/109 tests verdes) y aprobados
+> (ver specs/03-temas.md, src/commands/music.ts, src/core/analytics.ts).
 
 ## Objetivo
 Sumar las features más "cosméticas" y de mayor riesgo de UX una vez que
