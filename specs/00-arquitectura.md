@@ -36,6 +36,7 @@ CLAUDE.md       contexto corto que se carga en cada sesión
 - `06-effects-v2.md` — matrix, music, temas extra (bloqueado hasta cerrar el resto)
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal a todo
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal a todo
+- `10-diseno-visual.md` — dirección de arte transversal a temas y onboarding-ux
 
 ## Tabla dominio → agente dueño
 Antes de asignar cualquier tarea, confirmar acá el dueño — evita que un
@@ -51,6 +52,7 @@ subagente reciba trabajo fuera de su `alcance` declarado.
 | 06-effects-v2.md | *(sin agente creado aún — bloqueado, no es urgente)* |
 | 07-qa-testing.md | qa-testing (transversal) |
 | 08-seguridad.md | seguridad (transversal) |
+| 10-diseno-visual.md | diseno-visual (define y revisa, no implementa — themes y onboarding-ux ejecutan) |
 | build/deploy | devops |
 
 Si `orchestrator` (o cualquier agente) no encuentra dueño claro para una

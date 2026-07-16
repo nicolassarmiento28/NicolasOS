@@ -1,7 +1,7 @@
 ---
 name: qa-testing
 description: Usar de forma proactiva después de que cualquier otro subagente (core-engine, content, themes, onboarding-ux) reporte una tarea terminada, para validar cobertura de tests real y correr la suite completa antes de aprobar un commit.
-tools: Read, Bash, Grep, Glob
+tools: Read, Bash, Grep, Glob, mcp__playwright__*
 model: sonnet
 ---
 

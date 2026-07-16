@@ -4,6 +4,12 @@
   --theme-accent: #ff00ff;
   --theme-font: "Courier New", monospace;
   --theme-titlebar: linear-gradient(90deg, #ff00ff, #00ffff);
+  --theme-crt: 1;
+  --dim: rgba(255, 255, 255, 0.5);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
@@ -11,16 +17,115 @@ body {
   background: var(--theme-bg);
   color: var(--theme-text);
   font-family: var(--theme-font);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
 }
 
 #input-line #prompt {
   color: var(--theme-accent);
+  /* phosphor: sombra sutil del acento del tema (specs/10-diseno-visual.md) */
+  text-shadow: 0 0 4px var(--theme-accent);
+}
+
+/* cursor de bloque parpadeante, color de acento del tema activo */
+#cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background: var(--theme-accent);
+  vertical-align: text-bottom;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* cromo de ventana (specs/10-diseno-visual.md) */
+#window {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  background: var(--theme-bg);
+}
+
+#titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: var(--theme-titlebar);
+}
+
+#traffic-lights {
+  display: flex;
+  gap: 0.4rem;
+}
+
+#traffic-lights .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-red {
+  background: #ff5f56;
+}
+
+.dot-yellow {
+  background: #ffbd2e;
+}
+
+.dot-green {
+  background: #27c93f;
+}
+
+#titlebar-text {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.85;
+  color: var(--theme-text);
 }
 
 #terminal {
-  min-height: 100vh;
+  min-height: 60vh;
   box-sizing: border-box;
-  padding: 1rem;
+  padding: 1.75rem;
+}
+
+/* Efectos CRT (scanlines + viñeta), opcionales por tema vía --theme-crt (specs/10-diseno-visual.md) */
+#window::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(var(--theme-crt) * 0.025);
+  background: repeating-linear-gradient(
+    to bottom,
+    #000 0px,
+    #000 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+#window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--theme-crt);
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.35);
 }
 
 #output {
@@ -30,6 +135,13 @@ body {
 
 #output .echo {
   color: #6f6;
+}
+
+.ascii-banner {
+  color: var(--theme-accent);
+  text-shadow: 0 0 8px var(--theme-accent);
+  font-size: 0.7rem;
+  line-height: 1.2;
 }
 
 #input-line {
@@ -44,11 +156,25 @@ body {
   color: inherit;
   font: inherit;
   outline: none;
+  /* caret nativo oculto: #cursor (bloque parpadeante) lo reemplaza visualmente */
+  caret-color: transparent;
 }
 
 #hint {
   opacity: 0.7;
   margin-bottom: 0.5rem;
+}
+
+.chip-group {
+  margin: 0.5rem 0;
+}
+
+.chip-group-label {
+  font-size: 0.7rem;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
 }
 
 .chip {
@@ -61,27 +187,50 @@ body {
   color: var(--theme-accent);
   font: inherit;
   cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
 }
 
 .chip:hover,
 .chip:focus-visible {
   background: var(--theme-accent);
   color: var(--theme-bg);
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px var(--theme-accent);
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+/* grupo "extra" (easter eggs): menos peso visual que las acciones primarias */
+.chip-extra {
+  border-color: var(--dim);
+  color: var(--dim);
+  font-size: 0.9em;
+}
+
+.chip-extra:hover,
+.chip-extra:focus-visible {
+  background: var(--dim);
+  color: var(--theme-bg);
+  box-shadow: 0 0 10px var(--dim);
 }
 
 #fallback-toggle {
-  position: fixed;
-  top: 0.75rem;
-  right: 0.75rem;
-  z-index: 10;
   background: transparent;
   border: 1px solid var(--theme-text);
   color: var(--theme-text);
   border-radius: 4px;
-  padding: 0.35rem 0.7rem;
+  padding: 0.25rem 0.65rem;
   font: inherit;
+  font-size: 0.8rem;
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.85;
+  transition: opacity 150ms ease;
 }
 
 #fallback-toggle:hover {
@@ -91,6 +240,20 @@ body {
 #fallback-view {
   max-width: 720px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1.5rem;
   line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 0.75rem;
+  }
+
+  #terminal {
+    padding: 1.25rem;
+  }
+
+  #titlebar-text {
+    font-size: 0.75rem;
+  }
 }

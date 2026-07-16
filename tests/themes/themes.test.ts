@@ -14,7 +14,16 @@ describe("applyTheme", () => {
       expect(root.style.getPropertyValue("--theme-text")).toBe(tokens.text);
       expect(root.style.getPropertyValue("--theme-accent")).toBe(tokens.accent);
       expect(root.style.getPropertyValue("--theme-titlebar")).toBe(tokens.titlebar);
+      expect(root.style.getPropertyValue("--theme-crt")).toBe(tokens.crt ? "1" : "0");
     }
+  });
+
+  it("solo los temas tipo terminal (cyberpunk, linux, dos, hacker) llevan CRT", () => {
+    expect(THEMES.cyberpunk.crt).toBe(true);
+    expect(THEMES.linux.crt).toBe(true);
+    expect(THEMES.dos.crt).toBe(true);
+    expect(THEMES.hacker.crt).toBe(true);
+    expect(THEMES["windows-xp"].crt).toBe(false);
   });
 
   it("devuelve false y no cambia el tema activo ante un nombre inválido", () => {

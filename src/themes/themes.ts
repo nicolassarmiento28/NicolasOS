@@ -9,6 +9,8 @@ export interface ThemeTokens {
   accent: string;
   font: string;
   titlebar: string;
+  /** Efecto CRT (scanlines + viñeta), sólo para temas tipo terminal (specs/10-diseno-visual.md). */
+  crt: boolean;
 }
 
 export const THEMES: Record<string, ThemeTokens> = {
@@ -18,6 +20,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#ff00ff",
     font: "'Courier New', monospace",
     titlebar: "linear-gradient(90deg, #ff00ff, #00ffff)",
+    crt: true,
   },
   linux: {
     bg: "#000000",
@@ -25,6 +28,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#33ff33",
     font: "'Courier New', monospace",
     titlebar: "#1a1a1a",
+    crt: true,
   },
   dos: {
     bg: "#000000",
@@ -32,6 +36,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#ffffff",
     font: "'Consolas', monospace",
     titlebar: "#ffffff",
+    crt: true,
   },
   "windows-xp": {
     bg: "#ece9d8",
@@ -40,6 +45,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Tahoma', sans-serif",
     titlebar:
       "linear-gradient(180deg, #3a6ea5 0%, #1c4d9e 50%, #0a246a 100%)",
+    crt: false,
   },
   hacker: {
     bg: "#000000",
@@ -47,6 +53,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#00ff41",
     font: "'Courier New', monospace",
     titlebar: "#001a00",
+    crt: true,
   },
 };
 
@@ -64,6 +71,7 @@ export function applyTheme(name: string): boolean {
   root.style.setProperty("--theme-accent", tokens.accent);
   root.style.setProperty("--theme-font", tokens.font);
   root.style.setProperty("--theme-titlebar", tokens.titlebar);
+  root.style.setProperty("--theme-crt", tokens.crt ? "1" : "0");
   currentTheme = name;
   return true;
 }

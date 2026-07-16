@@ -39,9 +39,9 @@ describe("boot y onboarding-ux", () => {
     const toggle = document.querySelector<HTMLButtonElement>("#fallback-toggle")!;
     toggle.click();
     const fallbackView = document.querySelector("#fallback-view")!;
-    const terminal = document.querySelector("#terminal") as HTMLElement;
+    const win = document.querySelector("#window") as HTMLElement;
     expect((fallbackView as HTMLElement).hidden).toBe(false);
-    expect(terminal.hidden).toBe(true);
+    expect(win.hidden).toBe(true);
     expect(fallbackView.textContent).toContain("Proyectos");
     expect(fallbackView.textContent).toContain("Skills");
     expect(fallbackView.textContent).toContain("Contacto");

@@ -22,6 +22,7 @@ y el spec numerado del dominio correspondiente a la tarea.
 - `06-effects-v2.md` — matrix, music, temas extra (BLOQUEADO hasta cerrar el resto)
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal
+- `10-diseno-visual.md` — dirección de arte transversal a temas y onboarding-ux
 
 ## Subagentes disponibles (.claude/agents/)
 - `orchestrator` — punto de entrada para avanzar sin especificar tarea puntual; decide orden y hace cumplir los gates
@@ -32,6 +33,7 @@ y el spec numerado del dominio correspondiente a la tarea.
 - `qa-testing` — valida cobertura de tests antes de aprobar un commit
 - `seguridad` — revisa XSS, links externos, npm audit, antes de cerrar cualquier fase
 - `devops` — build, scripts, config para Vercel (sin ejecutar el deploy)
+- `diseno-visual` — define y revisa dirección de arte (no implementa código)
 
 ## Skills (.claude/skills/)
 - `command-pattern` — firma obligatoria, alias, manejo de errores y test
@@ -41,19 +43,22 @@ y el spec numerado del dominio correspondiente a la tarea.
   seguridad). NO ejecuta el deploy real, solo prepara y valida.
 
 ## Herramientas externas — uso obligatorio, no opcional
-Committeadas en `.mcp.json` (sin secretos en texto plano). Se usan SIEMPRE
-en su etapa, no solo cuando se acuerden:
+Committeadas en `.mcp.json`. Se usan SIEMPRE en su etapa, no solo cuando
+se acuerden. Git es 100% manual: el usuario hace cada commit y push a
+mano, tarea por tarea — no hay MCP de GitHub en este proyecto.
 
 - **Playwright MCP** — `onboarding-ux`, `qa-testing` y `seguridad` lo usan
   siempre para verificar en navegador real: chips tappeables, temas,
-  mobile, links externos. 
+  mobile, links externos. Instalación: `claude mcp add --scope project playwright npx @playwright/mcp@latest`
 - **Context7 MCP** — se consulta antes de asumir una API de Vite/Vitest/TS
-  por memoria. 
-- **Vercel MCP** (solo lectura) — `devops` lo usa para ver logs de build.`
-- **Skills** 
-`deploy-to-vercel`** — se corre siempre antes de decir que algo
+  por memoria. Instalación: `claude mcp add --scope project context7 -- npx -y @upstash/context7-mcp@latest`
+- **Vercel MCP** (solo lectura) — `devops` lo usa para ver logs de build.
+  Instalación: `claude mcp add --scope project --transport http vercel https://mcp.vercel.com`
+- **Ponytail** (plugin de terceros, no de Anthropic) — activo en cada
+  turno una vez instalado, aplica a todo el código. Se instala por sesión,
+  no vive en `.mcp.json`: `/plugin marketplace add DietrichGebert/ponytail` luego `/plugin install ponytail@ponytail`
+- **Skill `deploy-to-vercel`** — se corre siempre antes de decir que algo
   está listo para producción (no ejecuta el deploy real).
-`ponytail`** — Usa siempre Ponytail para ahorro de tokens en cada tarea del proyecto.
 
 Primera vez que se abre el proyecto: Claude Code pide aprobar los
 servers de `.mcp.json` — aceptar, o correr `/mcp`. Verificar todo con
@@ -72,7 +77,9 @@ sí especifica dominio o tarea, se puede ir directo al subagente:
 2. Delegar al subagente que tiene ese dominio en su alcance.
 3. `qa-testing` valida cobertura de tests, y `seguridad` revisa riesgos
    (XSS, links externos, dependencias) antes de aprobar.
-4. Si pasa → commit convencional (`feat(commands): add projects command`) → push.
+4. Si pasa → orchestrator propone el mensaje de commit convencional
+   (`feat(commands): add projects command`) y se detiene. El usuario
+   hace el commit y push a mano.
 5. Si falla → se corrige antes de seguir.
 6. No abrir `06-effects-v2.md` hasta que 01, 02, 03, 04, 05, 07 y 08 estén cerrados.
 7. Desarrollo fase por fase: al cerrar todas las tareas de un dominio,

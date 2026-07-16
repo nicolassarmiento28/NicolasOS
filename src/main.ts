@@ -11,15 +11,37 @@ import { profile, projects, skills, contact } from "./data/content";
 
 const history = new History();
 
+// banner ASCII de "NicolasOS" (specs/10-diseno-visual.md): se muestra de
+// golpe (tipear ASCII art letra por letra se ve raro), antes de los chips
+// de help. Color de acento vía CSS (--theme-accent), no fijo.
+const ASCII_BANNER = `
+ _   _ _           _         ___  ____
+| \\ | (_) ___ ___ | | __ _ __/ _ \\/ ___|
+|  \\| | |/ __/ _ \\| |/ _\` |____| | \\___ \\
+| |\\  | | (_| (_) | | (_| |____| |_ ___) |
+|_| \\_|_|\\___\\___/|_|\\__,_|   \\___/|____/
+`.trim();
+
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
-  <button id="fallback-toggle" type="button">Vista normal</button>
-  <div id="terminal">
-    <div id="hint">Escribe "help" para empezar.</div>
-    <div id="output"></div>
-    <div id="input-line">
-      <span id="prompt">nicolas@os:~$</span>
-      <input id="input" type="text" autocomplete="off" autofocus />
+  <div id="window">
+    <div id="titlebar">
+      <div id="traffic-lights">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+      </div>
+      <span id="titlebar-text">nicolas@os: ~</span>
+      <button id="fallback-toggle" type="button">Vista normal</button>
+    </div>
+    <div id="terminal">
+      <div id="hint">Escribe "help" para empezar.</div>
+      <div id="output"></div>
+      <div id="input-line">
+        <span id="prompt">nicolas@os:~$</span>
+        <input id="input" type="text" autocomplete="off" autofocus />
+        <span id="cursor"></span>
+      </div>
     </div>
   </div>
   <div id="fallback-view" hidden></div>
@@ -29,7 +51,27 @@ const output = document.querySelector<HTMLDivElement>("#output")!;
 const input = document.querySelector<HTMLInputElement>("#input")!;
 const fallbackToggle = document.querySelector<HTMLButtonElement>("#fallback-toggle")!;
 const fallbackView = document.querySelector<HTMLDivElement>("#fallback-view")!;
-const terminal = document.querySelector<HTMLDivElement>("#terminal")!;
+const win = document.querySelector<HTMLDivElement>("#window")!;
+
+/**
+ * Efecto de escritura (specs/10-diseno-visual.md): tipea `text` carácter a
+ * carácter a ~24ms/char en vez de aparecer de golpe. No bloquea el resto
+ * del boot (chips, foco del input) — corre en background con setTimeout.
+ * Por eso el criterio de aceptación ("el texto no está 100% presente en
+ * el primer frame") se cumple solo, sin lógica extra.
+ */
+function typeLine(text: string, className = ""): void {
+  const line = document.createElement("div");
+  if (className) line.className = className;
+  output.appendChild(line);
+  let i = 0;
+  const tick = () => {
+    line.textContent = text.slice(0, i);
+    i++;
+    if (i <= text.length) setTimeout(tick, 24);
+  };
+  tick();
+}
 
 function printLine(text: string, className = "", html = false): void {
   const line = document.createElement("div");
@@ -97,7 +139,8 @@ input.focus();
 
 // boot: se auto-ejecuta "help" sin esperar interacción (criterio de
 // aceptación de 01-onboarding-ux.md: la lista de comandos ya es visible al cargar).
-printLine('NicolasOS — escribe "help" para ver los comandos disponibles.');
+printLine(ASCII_BANNER, "ascii-banner");
+typeLine('NicolasOS — escribe "help" para ver los comandos disponibles.', "boot-text");
 handleSubmit("help", false);
 
 // vista fallback no técnica: mismo contenido (about, proyectos, skills,
@@ -132,11 +175,11 @@ fallbackToggle.addEventListener("click", () => {
   if (fallbackOpen) {
     fallbackView.innerHTML = renderFallbackView();
     fallbackView.hidden = false;
-    terminal.hidden = true;
+    win.hidden = true;
     fallbackToggle.textContent = "Vista terminal";
   } else {
     fallbackView.hidden = true;
-    terminal.hidden = false;
+    win.hidden = false;
     fallbackToggle.textContent = "Vista normal";
     input.focus();
   }
