@@ -27,12 +27,6 @@ visualmente se ve como dos ventanas superpuestas en vez de una sola pieza.
 redondeado continuo entre titlebar y body, sin gap ni doble sombra visible,
 en los tres temas v1 (cyberpunk, linux, dos).
 
-**Estado (revisado 2026-07-16)**: aprobado sin cambios. `.window` (en
-`src/style.css`) es el único elemento con `border-radius`/`overflow:
-hidden`/`box-shadow`; `.titlebar` y `#terminal` no definen ninguno de los
-tres. No había bug activo — confirmado por revisión de código, no hizo
-falta tocar nada.
-
 ### Bug conocido a evitar: titlebar incompleto según estilo
 El texto del path (`nicolas@os: ~`) y el botón "Vista normal"/"Vista
 terminal" tienen que estar presentes en la barra de título para los TRES
@@ -48,51 +42,35 @@ temas v1, no solo en cyberpunk.
 **Criterio de aceptación**: en ningún viewport (mobile incluido) el texto
 del terminal toca el borde de la pantalla sin padding.
 
-**Estado (revisado 2026-07-16)**: aprobado. El contenido de la titlebar
-(puntos, texto, botón) es una única plantilla HTML compartida entre
-`#window` y `#fallback-window` (`src/main.ts`), así que por construcción
-está presente en los tres temas — no hay riesgo de que un estilo se quede
-sin alguno de los elementos. El bug real era de contraste, no de
-contenido: el tema `dos` tenía texto blanco (`--theme-text`) sobre titlebar
-blanca. Se agregó el token `titlebarText` a `ThemeTokens`
-(`src/themes/themes.ts`), independiente de `text`, aplicado vía
-`--theme-titlebar-text` en `.titlebar-text` y en `#fallback-toggle`/
-`#fallback-close`. Valores por tema: `dos` → `#000000` (contraste sobre
-titlebar blanca), resto conserva el color de acento/texto original. Padding
-de `#terminal` (1.75rem, 1.25rem en mobile) y de `body` (2rem/1rem,
-0.75rem en mobile) evita texto pegado al borde en todos los viewports
-revisados.
-
 ## ASCII banner (implementa: onboarding-ux)
 - Logo ASCII de "NicolasOS" (o iniciales) se muestra antes de los chips de
   `help`, como parte del boot inicial.
 - Usa el color de acento del tema activo, no un color fijo.
-- Requiere `white-space: pre` (o `pre-wrap`) en el contenedor — sin esto,
-  los caracteres de arte ASCII se desalinean entre líneas.
-- `line-height`: preferir `1` a `1.1`. **Excepción documentada**: con la
-  fuente monoespaciada actual (`Courier New`/`Consolas`) y los caracteres
-  de caja del banner de `src/main.ts` (`ASCII_BANNER`), `1.1` corta las
-  líneas — se verificó que `1.2` es el valor mínimo sin overlap ni corte.
-  `1.2` es aceptable como techo mientras no cambien la fuente o el arte
-  ASCII; si se cambia cualquiera de los dos, volver a probar si `1.1`
-  alcanza. Implementado en `.ascii-banner` (`src/style.css`) con comentario
-  `ponytail:` explicando el motivo — no hace falta re-litigar esto en cada
-  revisión futura, ya quedó evaluado y aceptado acá.
-- En mobile, si el ancho del banner no entra en el viewport, preferir
-  `overflow-x: auto` (scroll horizontal contenido, sin cortar líneas) antes
-  que reducir el tamaño de fuente — a tamaños chicos los caracteres de caja
-  se vuelven ilegibles/se solapan. El resto del contenido de la vista
-  (chips, prompt, texto de boot) sigue sin scroll horizontal.
+- Requiere `white-space: pre` (o `pre-wrap`) y `line-height: 1` a `1.1` en
+  el contenedor — sin esto, los caracteres de arte ASCII se superponen o
+  se desalinean entre líneas (bug visto en la vista normal, donde el logo
+  se ve roto/ilegible).
+  - **Ajuste documentado (revisado por diseno-visual)**: con la fuente y
+    los caracteres de caja usados en el banner actual, `line-height: 1.1`
+    corta las líneas — `1.2` es el valor mínimo real sin overlap, probado
+    con Playwright (ver `src/style.css`, `.ascii-banner`). Se acepta como
+    excepción documentada al rango sugerido; si se cambia la fuente o el
+    arte ASCII, re-verificar si `1.1` vuelve a ser viable.
 
 **Criterio de aceptación**: captura de Playwright confirma que las líneas
 del ASCII art no se superponen ni se cortan, en terminal y en vista normal.
 
-**Estado (revisado 2026-07-16)**: aprobado con la excepción de
-`line-height: 1.2` documentada arriba (antes decía "bug" sin más detalle;
-ahora el criterio real es "sin overlap ni corte", medible, y `1.2` lo
-cumple donde `1.1` no). El uso de `overflow-x: auto` en mobile en vez de
-achicar la fuente es la resolución correcta según este mismo spec (prioriza
-legibilidad de los caracteres de caja sobre "quepa sin scroll").
+### Bug conocido a evitar: banner pegado al texto siguiente — RESUELTO
+Faltaba espaciado vertical entre el ASCII art y la línea de texto que viene
+después (ej. "NicolasOS — escribe help..."). Corregido con
+`margin: 0 0 1.2em` en `.ascii-banner` (`src/style.css`), que separa el
+banner del texto siguiente con más de una línea en blanco de margen.
+
+**Criterio de aceptación**: captura de Playwright confirma un espacio
+vertical visible entre el ASCII art y el texto que lo sigue.
+
+**Estado**: revisado por `diseno-visual` por lectura de código
+(`src/style.css`) — aprobado, fiel al criterio.
 
 ## Boot con efecto de escritura (implementa: onboarding-ux)
 - Los mensajes de boot se tipean carácter por carácter (20-30ms por
@@ -118,6 +96,31 @@ levemente menor que el resto — son easter eggs, no acciones primarias.
 - Cursor de bloque parpadeante, color del acento del tema activo.
 - El prompt (`nicolas@os:~$`) lleva un `text-shadow` sutil del mismo color
   de acento (efecto phosphor), configurable por tema.
+
+### Bug conocido a evitar: caret desacoplado del texto — RESUELTO
+El cursor parpadeante (el "caret", el punto de inserción de texto) debe
+fluir junto con lo que el usuario va tipeando — es un elemento `inline-block`
+dentro del mismo contenedor que el prompt y el input, inmediatamente
+después del último carácter escrito. NO debe tener `position: absolute`
+con coordenadas fijas — eso lo deja pegado a un punto fijo (ej. el borde
+izquierdo) en vez de moverse con el texto.
+
+Corregido en `src/style.css` (`#input` pasa de `flex: 1` a `width: 1ch;
+flex: none`) y `src/main.ts` (`syncInputWidth()`, llamada en `input` y tras
+`keydown` de Enter/ArrowUp/ArrowDown), que ajusta el ancho del input al
+largo del texto tipeado (`Nch`) para que `#cursor`, que le sigue en el
+flujo normal, quede siempre inmediatamente después del último carácter en
+vez de pegado al borde derecho del contenedor. No usa `position: absolute`.
+
+**Criterio de aceptación**: test o captura de Playwright que escribe texto
+en el input y confirma que el cursor aparece inmediatamente después del
+último carácter, no en una posición fija.
+
+**Estado**: revisado por `diseno-visual` por lectura de código
+(`src/style.css`, `src/main.ts`) — aprobado, fiel al criterio. Nota no
+bloqueante: el resize de `width` ocurre en saltos de `1ch` por tecla, sin
+transición CSS; con fuente monoespaciada el salto es imperceptible y el
+spec no exige suavizado de ancho, así que no se pide ajuste.
 
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.

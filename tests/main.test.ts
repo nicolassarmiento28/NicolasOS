@@ -56,4 +56,11 @@ describe("boot y onboarding-ux", () => {
     links.forEach((a) => expect(a.href).toMatch(/^https?:\/\//));
     expect(fallbackWindow.querySelector(".ascii-banner")).not.toBeNull();
   });
+  it("el input crece con el texto tipeado para que el cursor quede pegado al final (no fijo)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "whoami";
+    input.dispatchEvent(new Event("input"));
+    expect(input.style.width).toBe(`${input.value.length}ch`);
+  });
 });

@@ -130,6 +130,16 @@ output.addEventListener("click", (e) => {
   handleSubmit(target.dataset.cmd!);
 });
 
+// el input crece con el texto tipeado (width: Nch, ver style.css) para que
+// #cursor, inmediatamente después en el flujo normal, quede pegado al
+// último carácter en vez de a un punto fijo (bug conocido,
+// specs/10-diseno-visual.md).
+function syncInputWidth(): void {
+  input.style.width = `${Math.max(input.value.length, 1)}ch`;
+}
+
+input.addEventListener("input", syncInputWidth);
+
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     const raw = input.value;
@@ -142,6 +152,7 @@ input.addEventListener("keydown", (e) => {
     e.preventDefault();
     input.value = history.down();
   }
+  syncInputWidth();
 });
 
 app.addEventListener("click", (e) => {

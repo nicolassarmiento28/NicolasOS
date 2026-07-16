@@ -153,7 +153,9 @@ body {
      Playwright). 1.2 es el valor mínimo real sin overlap; ajustar el spec
      si se cambia la fuente/el arte. */
   line-height: 1.2;
-  margin: 0;
+  margin: 0 0 1.2em;
+  /* margin-bottom: separa el banner del texto siguiente (ej. boot-text) —
+     sin esto quedan pegados (bug conocido, specs/10-diseno-visual.md). */
   /* mobile: en vez de achicar la fuente (ilegible/overlap con box-drawing
      chars a tamaños chicos), scroll horizontal — nunca corta líneas. */
   max-width: 100%;
@@ -166,7 +168,13 @@ body {
 }
 
 #input {
-  flex: 1;
+  /* ancho ajustado al contenido tipeado (ver main.ts, syncInputWidth) en vez
+     de flex:1 — con flex:1 el input ocupa todo el espacio disponible y
+     #cursor queda pegado al borde derecho de la fila en vez de fluir junto
+     al texto (bug conocido, specs/10-diseno-visual.md). */
+  width: 1ch;
+  min-width: 1px;
+  flex: none;
   background: transparent;
   border: none;
   color: inherit;
