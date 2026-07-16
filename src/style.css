@@ -4,6 +4,7 @@
   --theme-accent: #ff00ff;
   --theme-font: "Courier New", monospace;
   --theme-titlebar: linear-gradient(90deg, #ff00ff, #00ffff);
+  --theme-titlebar-text: #f0f0f0;
   --theme-crt: 1;
   --dim: rgba(255, 255, 255, 0.5);
 }
@@ -95,7 +96,7 @@ body {
   text-align: center;
   font-size: 0.85rem;
   opacity: 0.85;
-  color: var(--theme-text);
+  color: var(--theme-titlebar-text);
 }
 
 #terminal {
@@ -142,7 +143,21 @@ body {
   color: var(--theme-accent);
   text-shadow: 0 0 8px var(--theme-accent);
   font-size: 0.7rem;
+  /* pre + line-height 1-1.1: sin esto el ASCII art se superpone entre
+     líneas (specs/10-diseno-visual.md, bug conocido). Explícito acá en vez
+     de depender de heredar white-space del contenedor padre (#output usa
+     pre-wrap, #fallback-content no define nada). */
+  white-space: pre;
+  /* ponytail: 1.2 en vez del 1-1.1 sugerido en el spec — con esta fuente y
+     los caracteres de caja del banner, 1.1 corta las líneas (probado con
+     Playwright). 1.2 es el valor mínimo real sin overlap; ajustar el spec
+     si se cambia la fuente/el arte. */
   line-height: 1.2;
+  margin: 0;
+  /* mobile: en vez de achicar la fuente (ilegible/overlap con box-drawing
+     chars a tamaños chicos), scroll horizontal — nunca corta líneas. */
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 #input-line {
@@ -221,10 +236,11 @@ body {
   box-shadow: 0 0 10px var(--dim);
 }
 
-#fallback-toggle {
+#fallback-toggle,
+#fallback-close {
   background: transparent;
-  border: 1px solid var(--theme-text);
-  color: var(--theme-text);
+  border: 1px solid var(--theme-titlebar-text);
+  color: var(--theme-titlebar-text);
   border-radius: 4px;
   padding: 0.25rem 0.65rem;
   font: inherit;
@@ -234,7 +250,8 @@ body {
   transition: opacity 150ms ease;
 }
 
-#fallback-toggle:hover {
+#fallback-toggle:hover,
+#fallback-close:hover {
   opacity: 1;
 }
 
@@ -314,4 +331,5 @@ body {
   .titlebar-text {
     font-size: 0.75rem;
   }
+
 }

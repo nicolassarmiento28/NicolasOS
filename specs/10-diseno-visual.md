@@ -16,13 +16,83 @@ en vez de resolver la estética cada uno por su lado.
 - El botón "Vista normal" vive DENTRO de esta barra de título, con el mismo
   lenguaje visual del tema activo (no un botón blanco genérico).
 
+### Bug conocido a evitar: doble contenedor (ventana "flotando" sobre otra)
+El titlebar y el body de la terminal deben ser hijos directos de UN SOLO
+contenedor padre, con `overflow: hidden` y el `border-radius` definido
+únicamente en ese padre. Ni el titlebar ni el body llevan su propio
+`border-radius` o `box-shadow` independiente — si cada uno tiene el suyo,
+visualmente se ve como dos ventanas superpuestas en vez de una sola pieza.
+
+**Criterio de aceptación**: captura de Playwright confirma un único borde
+redondeado continuo entre titlebar y body, sin gap ni doble sombra visible,
+en los tres temas v1 (cyberpunk, linux, dos).
+
+**Estado (revisado 2026-07-16)**: aprobado sin cambios. `.window` (en
+`src/style.css`) es el único elemento con `border-radius`/`overflow:
+hidden`/`box-shadow`; `.titlebar` y `#terminal` no definen ninguno de los
+tres. No había bug activo — confirmado por revisión de código, no hizo
+falta tocar nada.
+
+### Bug conocido a evitar: titlebar incompleto según estilo
+El texto del path (`nicolas@os: ~`) y el botón "Vista normal"/"Vista
+terminal" tienen que estar presentes en la barra de título para los TRES
+`titlebarStyle` de v1 (`mac` en cyberpunk, `flat` en linux y dos) — no solo
+para uno. Si la implementación arma una plantilla de titlebar distinta por
+estilo, replicar el mismo contenido (puntos, texto, botón) en cada una,
+solo cambia la forma/paleta, no qué elementos existen.
+
+**Criterio de aceptación**: test o captura de Playwright confirma que el
+botón de cambio de vista y el texto del path son visibles en los tres
+temas v1, no solo en cyberpunk.
+
 **Criterio de aceptación**: en ningún viewport (mobile incluido) el texto
 del terminal toca el borde de la pantalla sin padding.
+
+**Estado (revisado 2026-07-16)**: aprobado. El contenido de la titlebar
+(puntos, texto, botón) es una única plantilla HTML compartida entre
+`#window` y `#fallback-window` (`src/main.ts`), así que por construcción
+está presente en los tres temas — no hay riesgo de que un estilo se quede
+sin alguno de los elementos. El bug real era de contraste, no de
+contenido: el tema `dos` tenía texto blanco (`--theme-text`) sobre titlebar
+blanca. Se agregó el token `titlebarText` a `ThemeTokens`
+(`src/themes/themes.ts`), independiente de `text`, aplicado vía
+`--theme-titlebar-text` en `.titlebar-text` y en `#fallback-toggle`/
+`#fallback-close`. Valores por tema: `dos` → `#000000` (contraste sobre
+titlebar blanca), resto conserva el color de acento/texto original. Padding
+de `#terminal` (1.75rem, 1.25rem en mobile) y de `body` (2rem/1rem,
+0.75rem en mobile) evita texto pegado al borde en todos los viewports
+revisados.
 
 ## ASCII banner (implementa: onboarding-ux)
 - Logo ASCII de "NicolasOS" (o iniciales) se muestra antes de los chips de
   `help`, como parte del boot inicial.
 - Usa el color de acento del tema activo, no un color fijo.
+- Requiere `white-space: pre` (o `pre-wrap`) en el contenedor — sin esto,
+  los caracteres de arte ASCII se desalinean entre líneas.
+- `line-height`: preferir `1` a `1.1`. **Excepción documentada**: con la
+  fuente monoespaciada actual (`Courier New`/`Consolas`) y los caracteres
+  de caja del banner de `src/main.ts` (`ASCII_BANNER`), `1.1` corta las
+  líneas — se verificó que `1.2` es el valor mínimo sin overlap ni corte.
+  `1.2` es aceptable como techo mientras no cambien la fuente o el arte
+  ASCII; si se cambia cualquiera de los dos, volver a probar si `1.1`
+  alcanza. Implementado en `.ascii-banner` (`src/style.css`) con comentario
+  `ponytail:` explicando el motivo — no hace falta re-litigar esto en cada
+  revisión futura, ya quedó evaluado y aceptado acá.
+- En mobile, si el ancho del banner no entra en el viewport, preferir
+  `overflow-x: auto` (scroll horizontal contenido, sin cortar líneas) antes
+  que reducir el tamaño de fuente — a tamaños chicos los caracteres de caja
+  se vuelven ilegibles/se solapan. El resto del contenido de la vista
+  (chips, prompt, texto de boot) sigue sin scroll horizontal.
+
+**Criterio de aceptación**: captura de Playwright confirma que las líneas
+del ASCII art no se superponen ni se cortan, en terminal y en vista normal.
+
+**Estado (revisado 2026-07-16)**: aprobado con la excepción de
+`line-height: 1.2` documentada arriba (antes decía "bug" sin más detalle;
+ahora el criterio real es "sin overlap ni corte", medible, y `1.2` lo
+cumple donde `1.1` no). El uso de `overflow-x: auto` en mobile en vez de
+achicar la fuente es la resolución correcta según este mismo spec (prioriza
+legibilidad de los caracteres de caja sobre "quepa sin scroll").
 
 ## Boot con efecto de escritura (implementa: onboarding-ux)
 - Los mensajes de boot se tipean carácter por carácter (20-30ms por
@@ -81,13 +151,7 @@ con la misma identidad visual que el modo terminal, no como una página aparte.
   nombre, descripción, chips de stack (mismo estilo que los chips de
   comandos), Y un link visible a la demo (`Ver proyecto →`, usa el campo
   `url` de `Project` en `content.ts`) — ahora mismo el stack se muestra
-  pero el link a la demo falta por completo. `Project.url` es un campo
-  obligatorio del tipo (`content.ts:23`) y todos los proyectos actuales lo
-  tienen: no hace falta un estado "sin demo", el link siempre se renderiza.
-  Layout de tarjetas: grid responsive, 1 columna en mobile (`<600px`) y
-  2+ columnas en desktop — sin espaciado fijo en px más allá de lo ya
-  definido en "Espaciado y jerarquía" (usa la misma escala de espaciado
-  del tema, no valores nuevos).
+  pero el link a la demo falta por completo.
 - **Espaciado y jerarquía**: separación clara entre secciones (about,
   proyectos, skills, contacto), no todo corrido en el mismo bloque de texto.
 - **Consistencia con el cromo de ventana**: si el modo terminal tiene panel

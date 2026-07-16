@@ -9,6 +9,11 @@ export interface ThemeTokens {
   accent: string;
   font: string;
   titlebar: string;
+  /** Color de texto/botón/puntos de la titlebar. Separado de `text` porque el
+   * fondo de la titlebar (`titlebar`) puede tener bajo contraste con el color
+   * de texto del cuerpo (ej. tema "dos": titlebar blanca, texto blanco) —
+   * ver bug conocido "titlebar incompleto" en specs/10-diseno-visual.md. */
+  titlebarText: string;
   /** Efecto CRT (scanlines + viñeta), sólo para temas tipo terminal (specs/10-diseno-visual.md). */
   crt: boolean;
 }
@@ -20,6 +25,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#ff00ff",
     font: "'Courier New', monospace",
     titlebar: "linear-gradient(90deg, #ff00ff, #00ffff)",
+    titlebarText: "#f0f0f0",
     crt: true,
   },
   linux: {
@@ -28,6 +34,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#33ff33",
     font: "'Courier New', monospace",
     titlebar: "#1a1a1a",
+    titlebarText: "#33ff33",
     crt: true,
   },
   dos: {
@@ -36,6 +43,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#ffffff",
     font: "'Consolas', monospace",
     titlebar: "#ffffff",
+    titlebarText: "#000000",
     crt: true,
   },
   "windows-xp": {
@@ -45,6 +53,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Tahoma', sans-serif",
     titlebar:
       "linear-gradient(180deg, #3a6ea5 0%, #1c4d9e 50%, #0a246a 100%)",
+    titlebarText: "#ffffff",
     crt: false,
   },
   hacker: {
@@ -53,6 +62,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     accent: "#00ff41",
     font: "'Courier New', monospace",
     titlebar: "#001a00",
+    titlebarText: "#00ff41",
     crt: true,
   },
 };
@@ -71,6 +81,7 @@ export function applyTheme(name: string): boolean {
   root.style.setProperty("--theme-accent", tokens.accent);
   root.style.setProperty("--theme-font", tokens.font);
   root.style.setProperty("--theme-titlebar", tokens.titlebar);
+  root.style.setProperty("--theme-titlebar-text", tokens.titlebarText);
   root.style.setProperty("--theme-crt", tokens.crt ? "1" : "0");
   currentTheme = name;
   return true;
