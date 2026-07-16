@@ -15,12 +15,6 @@ en vez de resolver la estética cada uno por su lado.
 - Padding interno generoso (24-32px) — nunca texto pegado al borde del panel.
 - El botón "Vista normal" vive DENTRO de esta barra de título, con el mismo
   lenguaje visual del tema activo (no un botón blanco genérico).
-  **Aclaración**: "mismo lenguaje visual" significa usar variables de tema
-  (`--theme-*`), no color fijo/hardcodeado. El borde puede usar
-  `--theme-text` en vez de `--theme-accent` — ambos son tokens del tema y
-  cumplen el criterio. Reservar `--theme-accent` para el borde es preferible
-  si en algún momento se agrega, pero no es obligatorio: lo obligatorio es
-  no hardcodear un color fuera del sistema de tokens.
 
 **Criterio de aceptación**: en ningún viewport (mobile incluido) el texto
 del terminal toca el borde de la pantalla sin padding.
@@ -45,28 +39,15 @@ cada grupo (mismo estilo tipográfico, más chico y en `--dim`):
 - **info**: about, whoami, skills, projects
 - **contacto**: contact, github, linkedin, resume
 - **sistema**: theme, clear, history
-- **extra**: sudo, matrix, music, stats, y cualquier comando del registry
-  que no esté explícitamente listado en las otras tres categorías (ej.
-  `help`, `open`, o comandos futuros no categorizados).
+- **extra**: sudo, matrix, music, stats
 
 Los del grupo "extra" llevan menos peso visual: borde más tenue o tamaño
 levemente menor que el resto — son easter eggs, no acciones primarias.
-
-**Aclaración**: debe renderizarse UN SOLO bloque con label "extra", no
-múltiples bloques con el mismo label (uno para comandos categorizados como
-extra y otro como fallback de comandos no categorizados). Si el fallback de
-comandos no listados usa una ruta de código distinta a la categorización
-manual, unificar en un único grupo antes de renderizar — la separación en
-dos bloques con el mismo título es un incumplimiento de este punto.
 
 ## Cursor y prompt (implementa: themes, vía tokens; onboarding-ux, vía render)
 - Cursor de bloque parpadeante, color del acento del tema activo.
 - El prompt (`nicolas@os:~$`) lleva un `text-shadow` sutil del mismo color
   de acento (efecto phosphor), configurable por tema.
-- **Aclaración**: el cursor de bloque puede tener posición fija al final de
-  la línea de input (no necesita reposicionarse dinámicamente siguiendo el
-  ancho del texto tipeado mientras el usuario escribe). Seguir al caret en
-  tiempo real es una mejora deseable a futuro, no un requisito de v1.
 
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.
@@ -86,3 +67,33 @@ dos bloques con el mismo título es un incumplimiento de este punto.
 `diseno-visual` revisa (usando Playwright MCP) que el resultado sea fiel a
 esta dirección antes de que pase por `qa-testing`/`seguridad` — es un gate
 de fidelidad visual, no de funcionalidad ni de seguridad.
+
+## Vista normal / fallback (implementa: onboarding-ux)
+Ahora mismo es un volcado de texto plano sin jerarquía — hay que tratarla
+con la misma identidad visual que el modo terminal, no como una página aparte.
+
+- **Tipografía y color**: misma fuente monoespaciada y paleta del tema
+  activo (no un verde/magenta fijo sin relación al tema elegido en la
+  sesión de terminal).
+- **ASCII banner**: el mismo logo ASCII que aparece en el boot de la
+  terminal se repite arriba de esta vista, como ancla de identidad.
+- **Proyectos como tarjetas, no como lista de texto**: cada proyecto lleva
+  nombre, descripción, chips de stack (mismo estilo que los chips de
+  comandos), Y un link visible a la demo (`Ver proyecto →`, usa el campo
+  `url` de `Project` en `content.ts`) — ahora mismo el stack se muestra
+  pero el link a la demo falta por completo. `Project.url` es un campo
+  obligatorio del tipo (`content.ts:23`) y todos los proyectos actuales lo
+  tienen: no hace falta un estado "sin demo", el link siempre se renderiza.
+  Layout de tarjetas: grid responsive, 1 columna en mobile (`<600px`) y
+  2+ columnas en desktop — sin espaciado fijo en px más allá de lo ya
+  definido en "Espaciado y jerarquía" (usa la misma escala de espaciado
+  del tema, no valores nuevos).
+- **Espaciado y jerarquía**: separación clara entre secciones (about,
+  proyectos, skills, contacto), no todo corrido en el mismo bloque de texto.
+- **Consistencia con el cromo de ventana**: si el modo terminal tiene panel
+  con bordes redondeados y barra de título, esta vista vive dentro del
+  mismo tipo de contenedor, no a pantalla completa sin marco.
+
+**Criterio de aceptación**: cada proyecto en la vista normal muestra un
+link funcional a su demo (no solo el stack tecnológico), y el ASCII banner
+está presente en esta vista igual que en el boot de terminal.

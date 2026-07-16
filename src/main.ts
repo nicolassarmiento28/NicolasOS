@@ -24,14 +24,14 @@ const ASCII_BANNER = `
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
-  <div id="window">
-    <div id="titlebar">
-      <div id="traffic-lights">
+  <div id="window" class="window">
+    <div class="titlebar">
+      <div class="traffic-lights">
         <span class="dot dot-red"></span>
         <span class="dot dot-yellow"></span>
         <span class="dot dot-green"></span>
       </div>
-      <span id="titlebar-text">nicolas@os: ~</span>
+      <span class="titlebar-text">nicolas@os: ~</span>
       <button id="fallback-toggle" type="button">Vista normal</button>
     </div>
     <div id="terminal">
@@ -44,13 +44,26 @@ app.innerHTML = `
       </div>
     </div>
   </div>
-  <div id="fallback-view" hidden></div>
+  <div id="fallback-window" class="window" hidden>
+    <div class="titlebar">
+      <div class="traffic-lights">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+      </div>
+      <span class="titlebar-text">nicolas@os: ~ (vista normal)</span>
+      <button id="fallback-close" type="button">Vista terminal</button>
+    </div>
+    <div id="fallback-content"></div>
+  </div>
 `;
 
 const output = document.querySelector<HTMLDivElement>("#output")!;
 const input = document.querySelector<HTMLInputElement>("#input")!;
 const fallbackToggle = document.querySelector<HTMLButtonElement>("#fallback-toggle")!;
-const fallbackView = document.querySelector<HTMLDivElement>("#fallback-view")!;
+const fallbackClose = document.querySelector<HTMLButtonElement>("#fallback-close")!;
+const fallbackWindow = document.querySelector<HTMLDivElement>("#fallback-window")!;
+const fallbackContent = document.querySelector<HTMLDivElement>("#fallback-content")!;
 const win = document.querySelector<HTMLDivElement>("#window")!;
 
 /**
@@ -132,7 +145,7 @@ input.addEventListener("keydown", (e) => {
 });
 
 app.addEventListener("click", (e) => {
-  if ((e.target as HTMLElement).closest("#fallback-toggle, #fallback-view")) return;
+  if ((e.target as HTMLElement).closest("#fallback-toggle, #fallback-window")) return;
   input.focus();
 });
 input.focus();
@@ -144,43 +157,63 @@ typeLine('NicolasOS — escribe "help" para ver los comandos disponibles.', "boo
 handleSubmit("help", false);
 
 // vista fallback no técnica: mismo contenido (about, proyectos, skills,
-// contacto) sin terminal, a 1 click desde cualquier estado.
+// contacto) sin terminal, a 1 click desde cualquier estado. Mismo cromo de
+// ventana, tipografía y paleta del tema activo, y el mismo ASCII banner del
+// boot como ancla de identidad (specs/10-diseno-visual.md).
 function renderFallbackView(): string {
-  const projectItems = projects
-    .map((p) => `<li><strong>${p.name}</strong>: ${p.desc} (${p.stack.join(", ")})</li>`)
+  const projectCards = projects
+    .map(
+      (p) => `
+        <article class="project-card">
+          <h3>${p.name}</h3>
+          <p>${p.desc}</p>
+          <div class="chips">
+            ${p.stack.map((s) => `<span class="chip">${s}</span>`).join("")}
+          </div>
+          <a class="project-link" href="${p.url}" target="_blank" rel="noopener noreferrer">Ver proyecto →</a>
+        </article>`,
+    )
     .join("");
   const frontend = skills.frontend.map((s) => s.name).join(", ");
   const backend = skills.backend.map((s) => s.name).join(", ");
   const ia = skills.ia.join(", ");
   return `
-    <h1>${profile.name} — ${profile.title}</h1>
-    <p>${profile.location}</p>
-    <p>${profile.bio}</p>
-    <h2>Proyectos</h2>
-    <ul>${projectItems}</ul>
-    <h2>Skills</h2>
-    <p>Frontend: ${frontend}</p>
-    <p>Backend: ${backend}</p>
-    <p>IA/agentes: ${ia}</p>
-    <h2>Contacto</h2>
-    <p>Email: ${contact.email}</p>
-    <p><a href="${contact.github}" target="_blank" rel="noopener noreferrer">GitHub</a></p>
-    <p><a href="${contact.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
+    <pre class="ascii-banner">${ASCII_BANNER}</pre>
+    <section class="fallback-section">
+      <h1>${profile.name} — ${profile.title}</h1>
+      <p>${profile.location}</p>
+      <p>${profile.bio}</p>
+    </section>
+    <section class="fallback-section">
+      <h2>Proyectos</h2>
+      <div class="project-grid">${projectCards}</div>
+    </section>
+    <section class="fallback-section">
+      <h2>Skills</h2>
+      <p>Frontend: ${frontend}</p>
+      <p>Backend: ${backend}</p>
+      <p>IA/agentes: ${ia}</p>
+    </section>
+    <section class="fallback-section">
+      <h2>Contacto</h2>
+      <p>Email: ${contact.email}</p>
+      <p><a href="${contact.github}" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+      <p><a href="${contact.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a></p>
+    </section>
   `;
 }
 
-let fallbackOpen = false;
-fallbackToggle.addEventListener("click", () => {
-  fallbackOpen = !fallbackOpen;
-  if (fallbackOpen) {
-    fallbackView.innerHTML = renderFallbackView();
-    fallbackView.hidden = false;
-    win.hidden = true;
-    fallbackToggle.textContent = "Vista terminal";
-  } else {
-    fallbackView.hidden = true;
-    win.hidden = false;
-    fallbackToggle.textContent = "Vista normal";
-    input.focus();
-  }
-});
+function openFallback(): void {
+  fallbackContent.innerHTML = renderFallbackView();
+  fallbackWindow.hidden = false;
+  win.hidden = true;
+}
+
+function closeFallback(): void {
+  fallbackWindow.hidden = true;
+  win.hidden = false;
+  input.focus();
+}
+
+fallbackToggle.addEventListener("click", openFallback);
+fallbackClose.addEventListener("click", closeFallback);

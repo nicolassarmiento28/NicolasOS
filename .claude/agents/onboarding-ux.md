@@ -1,7 +1,7 @@
 ---
 name: onboarding-ux
 description: Usar para trabajar en la primera experiencia del usuario — boot sequence, chips tappeables de comandos, hint de ayuda, vista fallback no técnica, sugerencias de typo tolerance, y SEO/meta tags Open Graph en index.html (specs/05-seo-fallback.md). Espera el resultado de core-engine y content antes de integrar.
-tools: Read, Write, Edit, Bash, Grep, Glob, mcp__playwright__*
+tools: Read, Write, Edit, Bash, Grep, Glob, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_click, mcp__playwright__browser_resize, mcp__playwright__browser_evaluate, mcp__playwright__browser_console_messages, mcp__playwright__browser_close
 model: sonnet
 ---
 

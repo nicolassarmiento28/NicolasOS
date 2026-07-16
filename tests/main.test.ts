@@ -38,12 +38,22 @@ describe("boot y onboarding-ux", () => {
     await bootMain();
     const toggle = document.querySelector<HTMLButtonElement>("#fallback-toggle")!;
     toggle.click();
-    const fallbackView = document.querySelector("#fallback-view")!;
+    const fallbackWindow = document.querySelector("#fallback-window")!;
     const win = document.querySelector("#window") as HTMLElement;
-    expect((fallbackView as HTMLElement).hidden).toBe(false);
+    expect((fallbackWindow as HTMLElement).hidden).toBe(false);
     expect(win.hidden).toBe(true);
-    expect(fallbackView.textContent).toContain("Proyectos");
-    expect(fallbackView.textContent).toContain("Skills");
-    expect(fallbackView.textContent).toContain("Contacto");
+    expect(fallbackWindow.textContent).toContain("Proyectos");
+    expect(fallbackWindow.textContent).toContain("Skills");
+    expect(fallbackWindow.textContent).toContain("Contacto");
+  });
+
+  it("cada proyecto en la vista normal muestra un link funcional a su demo y el ASCII banner está presente", async () => {
+    await bootMain();
+    document.querySelector<HTMLButtonElement>("#fallback-toggle")!.click();
+    const fallbackWindow = document.querySelector("#fallback-window")!;
+    const links = fallbackWindow.querySelectorAll<HTMLAnchorElement>("a.project-link");
+    expect(links.length).toBeGreaterThan(0);
+    links.forEach((a) => expect(a.href).toMatch(/^https?:\/\//));
+    expect(fallbackWindow.querySelector(".ascii-banner")).not.toBeNull();
   });
 });
