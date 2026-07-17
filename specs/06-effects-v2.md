@@ -167,6 +167,58 @@ también que `initDrops()` (el fix anterior) se mantiene, ya que sigue
 siendo válido para el caso de regeneración de contenido tras resize, solo
 que no era la causa de este bug específico.
 
+### Bug residual: franja negra más chica, persiste tras el fix de posicionamiento
+**Confirmado en dispositivo real después de aplicar el fix de arriba**: el
+corte grande ya no está, pero queda una franja negra más chica, sin
+caracteres, entre el final del texto de la terminal y la barra de
+sugerencias del teclado (predictive text). **No es específico de
+Android** — se confirmó también en iPhone/iOS Safari, así que el fix no
+puede depender de nada exclusivo de una plataforma. Es un problema
+distinto — de **timing/regeneración del buffer**, no de posicionamiento
+(ese ya está resuelto y sí funciona en ambas plataformas).
+
+**Causa probable**: `applyCanvasSize()` hace `canvas.width = ...` /
+`canvas.height = ...` en cada evento — setear esas propiedades limpia
+**todo** el buffer del canvas, no solo la franja nueva. La apertura del
+teclado (en iOS y en Android) no es un solo evento: `visualViewport`
+dispara varios `resize`/`scroll` seguidos mientras el teclado se anima
+abriendo (y si hay una barra de sugerencias predictiva, puede cambiar de
+alto un momento después de que el teclado ya terminó de abrir, disparando
+otro resize adicional — esto aplica a los teclados predictivos de ambas
+plataformas, no solo Gboard). Cada uno de esos eventos intermedios vuelve
+a limpiar el buffer completo. Aunque `initDrops()` preserva la posición
+de caída de cada columna, el contenido ya pintado se pierde en cada
+wipe — y como cada columna dibuja un carácter por frame, reconstruir la
+franja recién expuesta toma varios frames. Si el screenshot se toma poco
+después de que el teclado terminó de abrirse, esa franja se ve vacía
+porque las gotas todavía no llegaron, combinado con que cada resize
+intermedio reinicia el progreso ya hecho.
+
+**A confirmar antes de implementar** (no implementar sin antes verificar
+esto, para no arreglar el síntoma equivocado otra vez, y confirmar en
+AMBAS plataformas — iOS y Android — no solo una):
+1. Loguear cuántas veces dispara `visualViewport resize`/`scroll` durante
+   una apertura real de teclado en dispositivo — si son 3-5 eventos en
+   ~300ms, cada uno está limpiando el buffer de nuevo.
+2. Si se confirma lo anterior, el fix es **debounce**: no llamar
+   `applyCanvasSize()`/`initDrops()` en cada evento individual, sino
+   esperar a que el viewport deje de cambiar (ej. ~100-150ms sin nuevos
+   eventos) antes de aplicar el resize una sola vez — el buffer se limpia
+   una vez, no varias, y queda más margen para que la animación rellene
+   la franja antes del próximo wipe.
+3. Alternativa/complementaria (evaluar solo si el debounce no alcanza):
+   usar `ctx.getImageData`/`putImageData` para preservar el contenido ya
+   dibujado al cambiar de tamaño, en vez de limpiar todo el buffer. Más
+   complejo — probablemente no hace falta si el debounce resuelve el caso.
+
+**Criterio de aceptación**: log/medición confirma la cantidad de eventos
+`resize`/`scroll` disparados durante una apertura real de teclado, en
+**iOS y Android por separado** (los timings de animación del teclado son
+distintos entre plataformas, el debounce tiene que funcionar para ambos).
+Con el debounce aplicado, confirmar en dispositivo real (o emulación lo
+más fiel posible) que la franja entre el texto y la barra de sugerencias
+también tiene lluvia de código, sin negro residual, en las dos plataformas.
+
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
 ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en

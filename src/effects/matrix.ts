@@ -29,6 +29,14 @@ let logicalHeight = 0;
 // del canvas, que el navegador limpia automáticamente al setear width/height
 // — sin regenerar acá, la franja recién visible queda negra sin lluvia.
 let drops: number[] = [];
+// La apertura del teclado virtual dispara varios eventos visualViewport
+// resize/scroll seguidos mientras anima (confirmado en iOS y Android, no es
+// un solo evento) — cada uno de esos, sin debounce, llamaría applyCanvasSize
+// (que limpia TODO el buffer nativamente al setear canvas.width/height) antes
+// de que la animación llegue a rellenar la franja recién expuesta. Debounce:
+// solo el último evento de la ráfaga aplica el resize.
+let viewportDebounceId: ReturnType<typeof setTimeout> | null = null;
+const VIEWPORT_DEBOUNCE_MS = 120;
 
 /**
  * Ajusta el arreglo de gotas al número de columnas actual sin resetear las
@@ -96,11 +104,14 @@ export function startMatrix(): void {
   // visible sin disparar "resize" de forma confiable en todos los browsers —
   // visualViewport sí lo cubre. Fallback a window.resize donde no exista.
   if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", handleResize);
+    // Debounced: ver comentario de viewportDebounceId. window.resize (rama
+    // else, desktop/fallback) NO se debounca: ahí es un evento único
+    // explícito, no una ráfaga.
+    window.visualViewport.addEventListener("resize", handleViewportChange);
     // El offset puede cambiar sin cambiar el tamaño (ej. el usuario sigue
     // escribiendo y el viewport visual se reposiciona) — "resize" solo no
     // alcanza, hace falta también "scroll" del visualViewport.
-    window.visualViewport.addEventListener("scroll", handleViewportScroll);
+    window.visualViewport.addEventListener("scroll", handleViewportChange);
   } else {
     window.addEventListener("resize", handleResize);
   }
@@ -166,9 +177,18 @@ function applyCanvasOffset(): void {
   canvas.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-/** Reposiciona el canvas sin tocar tamaño ni gotas (ver applyCanvasOffset). */
-function handleViewportScroll(): void {
-  applyCanvasOffset();
+/**
+ * Handler compartido de visualViewport resize/scroll: debounce genérico
+ * (no depende de timings de ninguna plataforma) — reprograma el timer en
+ * cada evento y solo aplica resize+offset una vez que la ráfaga terminó,
+ * para no limpiar el buffer del canvas una vez por cada evento intermedio.
+ */
+function handleViewportChange(): void {
+  if (viewportDebounceId !== null) clearTimeout(viewportDebounceId);
+  viewportDebounceId = setTimeout(() => {
+    viewportDebounceId = null;
+    handleResize();
+  }, VIEWPORT_DEBOUNCE_MS);
 }
 
 /** Redimensiona el canvas al viewport visible actual (mobile: barra de direcciones dinámica). */
@@ -222,10 +242,14 @@ export function stopMatrix(): void {
   }
   document.removeEventListener("keydown", handleEscape);
   if (window.visualViewport) {
-    window.visualViewport.removeEventListener("resize", handleResize);
-    window.visualViewport.removeEventListener("scroll", handleViewportScroll);
+    window.visualViewport.removeEventListener("resize", handleViewportChange);
+    window.visualViewport.removeEventListener("scroll", handleViewportChange);
   } else {
     window.removeEventListener("resize", handleResize);
+  }
+  if (viewportDebounceId !== null) {
+    clearTimeout(viewportDebounceId);
+    viewportDebounceId = null;
   }
   canvas?.remove();
   canvas = null;
