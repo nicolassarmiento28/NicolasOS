@@ -249,7 +249,7 @@ body {
      el render real (hinting/antialiasing) corta el borde del primer carácter
      con ese ancho justo (bug reportado). Mismo margen de seguridad que ya
      tiene el fallback en `ch` (+1), acá vía padding porque el ancho es fluido. */
-  padding-right: 0.15em;
+  padding-right: 0.4em;
   /* caret nativo oculto: #cursor (bloque parpadeante) lo reemplaza visualmente */
   caret-color: transparent;
 }

@@ -185,29 +185,30 @@ carácter. Usar `width: auto` / `fit-content` en ese contenedor, y confirmar
 que no hay ninguna transformación CSS (`scale`, `rotate`) aplicada
 condicionalmente que solo afecte al primer render.
 
-**El fix anterior resolvió el caso desktop — confirmado, no tocar esa
-parte.** Sigue roto específicamente en mobile/dispositivo real. Cualquier
-cambio nuevo debe ser mobile-specific (media query, detección de touch,
-lógica separada) y NO debe modificar el comportamiento ya funcionando en
-desktop — correr el test de desktop existente también después del cambio,
-para confirmar que sigue en verde y no hubo regresión. Revisar
-específicamente para el caso mobile:
-1. Los teclados virtuales mobile disparan eventos `compositionstart`/
-   `compositionupdate`/`compositionend` (por autocompletado/predicción de
-   texto), distintos a un simple evento `input` de desktop — si el
-   render del carácter tipeado depende solo de `input`, puede quedar
-   desincronizado con esos eventos de composición en el primer carácter.
-2. Confirmar que el fix de `width: auto`/`fit-content` realmente se
-   verificó en un viewport mobile con teclado virtual simulado (Playwright
-   permite emular esto) — si solo se probó con teclado físico/desktop, es
-   muy probable que el bug mobile nunca se haya reproducido en la revisión
-   anterior.
+**Causa raíz confirmada (no es desync de eventos de composición):**
+`field-sizing: content` mide el `#input` al pixel exacto del ancho del
+glyph. Ese ancho justo no deja margen para el hinting/antialiasing del
+render real en mobile, y el borde del carácter queda recortado — aunque
+el ancho ya se haya actualizado a tiempo (se confirmó vía
+`getBoundingClientRect` vs `scrollWidth`/`measureText` en Playwright que
+el valor computado coincide con el contenido, el corte es de render, no
+de timing). Los listeners de `compositionupdate`/`compositionend` en
+`main.ts` (`syncInputWidth`) siguen siendo necesarios como fallback en
+`ch` para navegadores sin `field-sizing`, pero no son la causa de este
+bug específico.
+
+**Fix**: `padding-right: 0.4em` en `#input` (`src/style.css`), como
+margen de seguridad sobre el ancho exacto que calcula `field-sizing:
+content`. Si se ajusta este valor, mantenerlo lo bastante grande para
+cubrir el peor caso de hinting en fuentes monoespaciadas reales de
+dispositivo, no solo en el viewport emulado de Playwright.
 
 **Criterio de aceptación**: captura de Playwright que escribe una sola
 letra y confirma que se renderiza completa y sin distorsión — en viewport
-mobile (390x844) CON
-emulación de teclado virtual/eventos de composición, no solo con `type()`
-estándar de Playwright (que puede no reproducir el bug real de mobile).
+mobile (390x844). Si se reporta que sigue viéndose cortado en un
+dispositivo real después de este fix, subir `padding-right` en vez de
+reintroducir lógica de composition-event, salvo que se confirme con
+evidencia (no solo el síntoma) que el desync de eventos es la causa.
 
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.
