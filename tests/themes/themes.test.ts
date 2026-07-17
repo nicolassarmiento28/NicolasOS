@@ -15,7 +15,15 @@ describe("applyTheme", () => {
       expect(root.style.getPropertyValue("--theme-accent")).toBe(tokens.accent);
       expect(root.style.getPropertyValue("--theme-titlebar")).toBe(tokens.titlebar);
       expect(root.style.getPropertyValue("--theme-crt")).toBe(tokens.crt ? "1" : "0");
+      expect(root.style.getPropertyValue("--dim")).toBe(tokens.dim);
     }
+  });
+
+  it("windows-xp usa un --dim con contraste suficiente contra su fondo claro, distinto del gris de los temas oscuros", () => {
+    applyTheme("windows-xp");
+    const dim = document.documentElement.style.getPropertyValue("--dim");
+    expect(dim).toBe(THEMES["windows-xp"].dim);
+    expect(dim).not.toBe("rgba(255, 255, 255, 0.5)");
   });
 
   it("linux y hacker se distinguen visualmente (no solo tono de verde)", () => {

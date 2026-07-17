@@ -17,6 +17,12 @@ export interface ThemeTokens {
    * de texto del cuerpo (ej. tema "dos": titlebar blanca, texto blanco) —
    * ver bug conocido "titlebar incompleto" en specs/10-diseno-visual.md. */
   titlebarText: string;
+  /** Color tenue para texto secundario (labels de categoría de chips, etc.).
+   * Por tema porque un gris fijo pensado para fondos oscuros pierde contraste
+   * en temas claros como windows-xp — ver bug "labels invisibles" en
+   * specs/10-diseno-visual.md. Cada valor cumple contraste WCAG >= 4.5:1
+   * contra el `bg` de su propio tema. */
+  dim: string;
   /** Efecto CRT (viñeta), sólo para temas tipo terminal (specs/10-diseno-visual.md). */
   crt: boolean;
   /** Intensidad de glow/text-shadow (prompt, banner, chips en hover). "intense" agrega
@@ -84,6 +90,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Courier New', monospace",
     titlebar: "linear-gradient(90deg, #ff00ff, #00ffff)",
     titlebarText: "#f0f0f0",
+    dim: "rgba(255, 255, 255, 0.5)",
     crt: true,
     glowIntensity: "strong",
     scanlinesIntensity: "visible",
@@ -99,6 +106,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Courier New', monospace",
     titlebar: "#1a1a1a",
     titlebarText: "#33ff33",
+    dim: "rgba(255, 255, 255, 0.5)",
     crt: false,
     glowIntensity: "none",
     scanlinesIntensity: "none",
@@ -114,6 +122,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Consolas', monospace",
     titlebar: "#ffffff",
     titlebarText: "#000000",
+    dim: "rgba(255, 255, 255, 0.5)",
     crt: true,
     glowIntensity: "none",
     scanlinesIntensity: "none",
@@ -130,6 +139,11 @@ export const THEMES: Record<string, ThemeTokens> = {
     titlebar:
       "linear-gradient(180deg, #3a6ea5 0%, #1c4d9e 50%, #0a246a 100%)",
     titlebarText: "#ffffff",
+    // Gris medio, no el rgba(255,255,255,0.5) de los temas oscuros: contra el
+    // fondo claro (#ece9d8) ese blanco semi-transparente es invisible (bug
+    // conocido, specs/10-diseno-visual.md). #5a5a5a da contraste ~5.65:1
+    // (>= 4.5:1 exigido); #6b6b6b mencionado en el spec da ~4.37:1, no alcanza.
+    dim: "#5a5a5a",
     crt: false,
     glowIntensity: "none",
     scanlinesIntensity: "none",
@@ -149,6 +163,7 @@ export const THEMES: Record<string, ThemeTokens> = {
     font: "'Courier New', monospace",
     titlebar: "#001a00",
     titlebarText: "#00ff41",
+    dim: "rgba(255, 255, 255, 0.5)",
     crt: true,
     glowIntensity: "intense",
     scanlinesIntensity: "intense",
@@ -177,6 +192,7 @@ export function applyTheme(name: string): boolean {
   root.style.setProperty("--theme-font", tokens.font);
   root.style.setProperty("--theme-titlebar", tokens.titlebar);
   root.style.setProperty("--theme-titlebar-text", tokens.titlebarText);
+  root.style.setProperty("--dim", tokens.dim);
   root.style.setProperty("--theme-crt", tokens.crt ? "1" : "0");
   root.style.setProperty("--theme-glow", GLOW_PX[tokens.glowIntensity]);
   root.style.setProperty("--theme-glow-2", GLOW_PX_2[tokens.glowIntensity]);
