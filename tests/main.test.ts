@@ -88,4 +88,40 @@ describe("boot y onboarding-ux", () => {
     expect(root.style.getPropertyValue("--theme-bg")).not.toBe(THEMES.cyberpunk.bg);
     expect(root.style.getPropertyValue("--theme-accent")).not.toBe(THEMES.cyberpunk.accent);
   });
+
+  it("las líneas de prompt (.echo) en el historial usan var(--theme-accent), nunca un color hardcodeado (specs/03-temas.md, bug conocido)", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const css = fs.readFileSync(
+      path.resolve(__dirname, "../src/style.css"),
+      "utf-8",
+    );
+    const echoRule = css.match(/#output \.echo\s*{([^}]*)}/)?.[1] ?? "";
+    expect(echoRule).toContain("var(--theme-accent)");
+    // ninguna otra regla de #output/.echo debe fijar un color hardcodeado
+    // (ej. el verde #6f6 heredado de cyberpunk/hacker) que ignore el tema activo.
+    expect(echoRule).not.toMatch(/#[0-9a-f]{3,6}/i);
+  });
+
+  it("el eco de un comando ya impreso se recolorea al cambiar de tema, no queda 'congelado' (specs/03-temas.md)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    const enter = new KeyboardEvent("keydown", { key: "Enter" });
+    input.value = "whoami";
+    input.dispatchEvent(enter);
+    const echoLine = document.querySelector("#output .echo") as HTMLElement;
+    expect(echoLine).not.toBeNull();
+    // sin color inline: el color viene siempre de la CSS custom property del
+    // tema activo (var(--theme-accent) en #output .echo), que applyTheme()
+    // actualiza en documentElement al cambiar de tema — nunca se fija en JS
+    // en el momento del render, así que las líneas viejas se actualizan solas.
+    expect(echoLine.style.color).toBe("");
+    input.value = "theme windows-xp";
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(document.documentElement.style.getPropertyValue("--theme-accent")).toBe(
+      THEMES["windows-xp"].accent,
+    );
+    // la línea vieja sigue sin color inline: sigue leyendo la var actualizada.
+    expect(echoLine.style.color).toBe("");
+  });
 });

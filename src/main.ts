@@ -16,6 +16,30 @@ const history = new History();
 // de :root en style.css (esos son solo fallback antes de que corra JS).
 applyTheme(DEFAULT_THEME);
 
+// Bug conocido (specs/10-diseno-visual.md "botón de cambio de vista poco
+// visible"): con titlebar en gradiente (cyberpunk), el botón #fallback-toggle
+// necesita un fondo opaco propio para no perder contraste contra el
+// gradiente (ver regla `.titlebar-gradient` en style.css). Se detecta en
+// runtime leyendo la custom property, no por nombre de tema hardcodeado —
+// así cualquier tema futuro con titlebar en gradiente queda cubierto solo,
+// sin tocar themes.ts. applyTheme() muta `style` en documentElement cada
+// vez que corre (init o `theme <n>`), así que un MutationObserver sobre ese
+// atributo cubre ambos casos con un solo listener.
+function syncTitlebarGradientClass() {
+  const titlebar = getComputedStyle(document.documentElement).getPropertyValue(
+    "--theme-titlebar",
+  );
+  document.documentElement.classList.toggle(
+    "titlebar-gradient",
+    titlebar.includes("gradient"),
+  );
+}
+syncTitlebarGradientClass();
+new MutationObserver(syncTitlebarGradientClass).observe(document.documentElement, {
+  attributes: true,
+  attributeFilter: ["style"],
+});
+
 // banner ASCII de "NicolasOS" (specs/10-diseno-visual.md): se muestra de
 // golpe (tipear ASCII art letra por letra se ve raro), antes de los chips
 // de help. Color de acento vía CSS (--theme-accent), no fijo.
