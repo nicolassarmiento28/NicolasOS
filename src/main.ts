@@ -287,6 +287,6 @@ document.addEventListener("click", (e) => {
   } else if (target.closest(".win-minimize")) {
     printLine("esto no minimiza nada, pero lindo intento.");
   } else if (target.closest(".win-close")) {
-    printLine("no podés cerrarme tan fácil.");
+    printLine("no puedes cerrarme tan fácil.");
   }
 });
