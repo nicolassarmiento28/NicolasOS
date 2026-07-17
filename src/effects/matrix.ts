@@ -46,18 +46,28 @@ const VIEWPORT_DEBOUNCE_MS = 120;
 // cerrado — no es parte de la superficie normal del producto.
 const debugEnabled = new URLSearchParams(location.search).get("debug") === "matrix";
 let debugEl: HTMLDivElement | null = null;
+// Línea marcadora en el borde inferior REAL del canvas (offsetTop + height):
+// si la franja negra reportada queda por encima de esta línea, el canvas no
+// llega — bug real. Si queda por debajo, es UI del teclado/sistema, fuera de
+// nuestro control — no hay nada que arreglar del lado de la página.
+let debugMarkerEl: HTMLDivElement | null = null;
 let rawEventCount = 0;
 let appliedCount = 0;
 
 function debugLog(): void {
   if (!debugEnabled || !debugEl) return;
   const vv = window.visualViewport;
+  const offsetTop = vv?.offsetTop ?? 0;
+  const offsetLeft = vv?.offsetLeft ?? 0;
   debugEl.textContent =
     `raw events: ${rawEventCount} | applied: ${appliedCount}\n` +
     `vv.height: ${vv?.height?.toFixed(1)} | vv.width: ${vv?.width?.toFixed(1)}\n` +
-    `vv.offsetTop: ${vv?.offsetTop?.toFixed(1)} | vv.offsetLeft: ${vv?.offsetLeft?.toFixed(1)}\n` +
+    `vv.offsetTop: ${offsetTop.toFixed(1)} | vv.offsetLeft: ${offsetLeft.toFixed(1)}\n` +
     `innerHeight: ${window.innerHeight} | innerWidth: ${window.innerWidth}\n` +
     `canvas: ${logicalWidth}x${logicalHeight} @ transform ${canvas?.style.transform ?? "-"}`;
+  if (debugMarkerEl) {
+    debugMarkerEl.style.transform = `translate(${offsetLeft}px, ${offsetTop + logicalHeight}px)`;
+  }
 }
 
 /**
@@ -117,6 +127,13 @@ export function startMatrix(): void {
       "position:fixed;top:0;left:0;z-index:9999;background:rgba(255,0,0,0.85);" +
       "color:#fff;font:11px monospace;padding:6px;white-space:pre;pointer-events:none;";
     document.body.appendChild(debugEl);
+
+    debugMarkerEl = document.createElement("div");
+    debugMarkerEl.id = "matrix-debug-marker";
+    debugMarkerEl.style.cssText =
+      "position:fixed;top:0;left:0;width:100%;height:3px;z-index:9999;" +
+      "background:cyan;pointer-events:none;";
+    document.body.appendChild(debugMarkerEl);
   }
 
   const ctx = canvas.getContext("2d");
@@ -293,4 +310,6 @@ export function stopMatrix(): void {
   canvas = null;
   debugEl?.remove();
   debugEl = null;
+  debugMarkerEl?.remove();
+  debugMarkerEl = null;
 }

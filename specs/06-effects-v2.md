@@ -251,6 +251,36 @@ el teclado en su dispositivo (iOS y/o Android). Con esos números se
 confirma o descarta la hipótesis de debounce/ráfaga de eventos antes de
 seguir iterando a ciegas.
 
+### Dato real obtenido: el canvas coincide con visualViewport, franja podría ser UI del sistema
+**Primer reporte real del overlay** (Android, teclado abierto): `raw
+events: 52 | applied: 2`, `vv.height: 434.0 | vv.width: 428.0`,
+`vv.offsetTop: 0.0 | vv.offsetLeft: 0.0`, `canvas: 428x434 @ transform
+translate(0px, 0px)`. El debounce funciona (52 eventos crudos → 2
+aplicaciones reales). El canvas coincide exactamente en tamaño y
+posición con `visualViewport` — matemáticamente cubre el 100% de lo que
+el navegador reporta como área visible de la página.
+
+**Nueva hipótesis**: si el canvas coincide exactamente con
+`visualViewport` y aun así hay una franja negra visible arriba del
+teclado, esa franja probablemente **no es parte de la página** — es la
+barra de sugerencias predictivas o el borde superior del teclado del
+sistema operativo, dibujada por encima de todo, fuera de
+`visualViewport` y fuera de cualquier control posible desde CSS/JS de la
+página.
+
+**A confirmar antes de seguir iterando código**: agregar al overlay de
+debug un marcador visual (línea de color sólido, ancho completo, 2-3px)
+posicionado exactamente en el borde inferior real del canvas
+(`offsetTop + height`, mismo `transform` que el canvas). Con eso, una
+captura del dispositivo real muestra sin ambigüedad si la franja negra
+está POR ENCIMA de esa línea (canvas no llega — bug real, seguir
+iterando) o POR DEBAJO (UI del teclado/sistema, no es un bug de la
+página — cerrar este ítem, no hay nada más que hacer del lado del
+código).
+
+**Criterio de aceptación**: captura de dispositivo real (iOS y Android)
+con el marcador visible confirma en cuál de los dos casos estamos.
+
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
 ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en
