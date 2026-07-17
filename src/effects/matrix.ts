@@ -38,6 +38,28 @@ let drops: number[] = [];
 let viewportDebounceId: ReturnType<typeof setTimeout> | null = null;
 const VIEWPORT_DEBOUNCE_MS = 120;
 
+// Overlay de debug temporal (?debug=matrix en la URL) para diagnosticar en
+// dispositivo real sin cable/consola remota: muestra en vivo los valores de
+// visualViewport y cuántos eventos crudos vs aplicaciones reales de resize
+// hubo, para confirmar o descartar hipótesis de causa raíz sin adivinar.
+// ponytail: hack de diagnóstico a propósito, se saca cuando el bug quede
+// cerrado — no es parte de la superficie normal del producto.
+const debugEnabled = new URLSearchParams(location.search).get("debug") === "matrix";
+let debugEl: HTMLDivElement | null = null;
+let rawEventCount = 0;
+let appliedCount = 0;
+
+function debugLog(): void {
+  if (!debugEnabled || !debugEl) return;
+  const vv = window.visualViewport;
+  debugEl.textContent =
+    `raw events: ${rawEventCount} | applied: ${appliedCount}\n` +
+    `vv.height: ${vv?.height?.toFixed(1)} | vv.width: ${vv?.width?.toFixed(1)}\n` +
+    `vv.offsetTop: ${vv?.offsetTop?.toFixed(1)} | vv.offsetLeft: ${vv?.offsetLeft?.toFixed(1)}\n` +
+    `innerHeight: ${window.innerHeight} | innerWidth: ${window.innerWidth}\n` +
+    `canvas: ${logicalWidth}x${logicalHeight} @ transform ${canvas?.style.transform ?? "-"}`;
+}
+
 /**
  * Ajusta el arreglo de gotas al número de columnas actual sin resetear las
  * que ya existían: agrega columnas nuevas en 1 (arrancan cayendo) o recorta
@@ -85,6 +107,17 @@ export function startMatrix(): void {
   canvas.style.zIndex = "-1";
   canvas.style.pointerEvents = "none";
   document.body.appendChild(canvas);
+
+  if (debugEnabled) {
+    rawEventCount = 0;
+    appliedCount = 0;
+    debugEl = document.createElement("div");
+    debugEl.id = "matrix-debug";
+    debugEl.style.cssText =
+      "position:fixed;top:0;left:0;z-index:9999;background:rgba(255,0,0,0.85);" +
+      "color:#fff;font:11px monospace;padding:6px;white-space:pre;pointer-events:none;";
+    document.body.appendChild(debugEl);
+  }
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -161,6 +194,7 @@ function applyCanvasSize(): void {
   const ctx = canvas.getContext("2d");
   ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
   applyCanvasOffset();
+  debugLog();
 }
 
 // Al abrir el teclado virtual, el navegador scrollea la página para mantener
@@ -184,6 +218,8 @@ function applyCanvasOffset(): void {
  * para no limpiar el buffer del canvas una vez por cada evento intermedio.
  */
 function handleViewportChange(): void {
+  rawEventCount++;
+  debugLog();
   if (viewportDebounceId !== null) clearTimeout(viewportDebounceId);
   viewportDebounceId = setTimeout(() => {
     viewportDebounceId = null;
@@ -194,11 +230,13 @@ function handleViewportChange(): void {
 /** Redimensiona el canvas al viewport visible actual (mobile: barra de direcciones dinámica). */
 function handleResize(): void {
   if (!canvas) return;
+  appliedCount++;
   applyCanvasSize();
   // Setear canvas.width/height (dentro de applyCanvasSize) limpia el buffer
   // nativamente — tratar el resize como un mini-reinicio del grid evita que
   // la franja recién visible quede negra.
   initDrops();
+  debugLog();
 }
 
 /**
@@ -253,4 +291,6 @@ export function stopMatrix(): void {
   }
   canvas?.remove();
   canvas = null;
+  debugEl?.remove();
+  debugEl = null;
 }

@@ -219,6 +219,38 @@ Con el debounce aplicado, confirmar en dispositivo real (o emulación lo
 más fiel posible) que la franja entre el texto y la barra de sugerencias
 también tiene lluvia de código, sin negro residual, en las dos plataformas.
 
+### Debounce aplicado, franja residual persiste — Playwright no puede verificar esto
+**Confirmado en dispositivo real después del fix de debounce (commit
+`2e38209`)**: la franja negra sigue apareciendo, sin cambio observable.
+
+**Limitación de herramienta descubierta**: Playwright (Chrome desktop)
+**no puede reproducir la apertura real de teclado virtual mobile** —
+`visualViewport.height`/`offsetTop` son propiedades de solo lectura que
+controla el motor del navegador según el teclado táctil real, y Chrome
+desktop no tiene teclado táctil que las dispare. Todas las
+verificaciones anteriores de este bug hechas "con Playwright" fueron en
+los hechos solo revisión de código (los subagentes de gate confirmaron
+lógica, nunca observaron el bug real reproducido ni corregido) — el
+criterio de aceptación de arriba ("captura de Playwright... confirma...
+sin negro residual") **no es alcanzable con las herramientas actuales**
+para este bug específico y hay que dejar de exigirlo como gate hasta
+tener otra vía de verificación real.
+
+**Instrumentación agregada para diagnóstico real** (`src/effects/matrix.ts`):
+overlay de debug activado por query param `?debug=matrix`, que muestra en
+vivo `visualViewport.height/width/offsetTop/offsetLeft`,
+`innerHeight/innerWidth`, tamaño y `transform` actual del canvas, y un
+contador de eventos crudos de `visualViewport` vs aplicaciones reales de
+resize (post-debounce) — para leer directamente en la pantalla del
+celular sin necesitar cable ni consola remota. Es diagnóstico temporal
+(`ponytail:` marcado en el código), se saca una vez cerrado este bug, no
+es parte de la superficie normal del producto.
+
+**Pendiente**: el usuario reporta los valores reales del overlay abriendo
+el teclado en su dispositivo (iOS y/o Android). Con esos números se
+confirma o descarta la hipótesis de debounce/ráfaga de eventos antes de
+seguir iterando a ciegas.
+
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
 ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en
