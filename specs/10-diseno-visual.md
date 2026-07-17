@@ -7,14 +7,35 @@ CÓMO se ve y se siente — para que ambos dominios implementen consistente
 en vez de resolver la estética cada uno por su lado.
 
 ## Cromo de ventana (implementa: onboarding-ux)
-- Panel contenedor con `max-width` (900-1000px), centrado en el viewport,
-  no el contenido tocando el borde de la pantalla.
-- Barra de título falsa arriba: 3 puntos de colores (rojo/amarillo/verde,
-  estilo macOS) a la izquierda, texto `nicolas@os: ~` centrado.
-- Bordes redondeados sutiles (8-10px) y sombra difusa hacia abajo.
-- Padding interno generoso (24-32px) — nunca texto pegado al borde del panel.
-- El botón "Vista normal" vive DENTRO de esta barra de título, con el mismo
-  lenguaje visual del tema activo (no un botón blanco genérico).
+Pantalla completa, sin panel flotante ni fondo de página visible alrededor
+— la terminal ES la página, no una ventana sobre un fondo. Se revierte acá
+la versión anterior (panel centrado con `max-width`, sombra y bordes
+redondeados) porque en la práctica se sentía como dos capas separadas
+("elevación" — el panel se leía como una ventana flotando sobre otro fondo).
+
+- El contenedor de la terminal ocupa **100% del viewport** (ancho y alto),
+  mismo color de fondo en todos lados — no hay ningún borde visible entre
+  "el panel" y "la página", porque son la misma superficie.
+- **Sin `box-shadow`, sin `border-radius`** en el contenedor principal —
+  eso es justamente lo que generaba el efecto de elevación no deseado.
+- La barra de título (3 puntos, texto `nicolas@os: ~`, botón "Vista
+  normal") sigue existiendo, pero como una franja que ocupa el 100% del
+  ancho arriba, no como parte de un panel flotante — se integra a la
+  página, no "flota" sobre ella.
+- El padding interno generoso (24-32px) se mantiene para que el texto no
+  toque los bordes del viewport, pero eso es padding del contenido, no un
+  margen que deje ver un fondo distinto alrededor de un panel.
+- **`body` no lleva padding en ningún breakpoint**, ni siquiera en mobile.
+  Cualquier "aire" extra en mobile va en `#terminal`/`#fallback-content`
+  (contenido), nunca en `body` — si `body` tiene padding y `.window` es
+  `width: 100%`, se ve el fondo de `body` alrededor de `.window`, que es
+  exactamente el efecto de panel flotante que este spec revierte.
+
+**Criterio de aceptación**: captura de Playwright en distintos tamaños de
+viewport (incluido mobile, ≤600px) confirma que no hay ningún área de
+fondo visible entre el contenido de la terminal y el borde de la ventana
+del navegador — todo es una sola superficie continua, sin sombra ni borde
+redondeado generando sensación de panel separado.
 
 ### Bug conocido a evitar: doble contenedor (ventana "flotando" sobre otra)
 El titlebar y el body de la terminal deben ser hijos directos de UN SOLO
@@ -22,6 +43,9 @@ contenedor padre, con `overflow: hidden` y el `border-radius` definido
 únicamente en ese padre. Ni el titlebar ni el body llevan su propio
 `border-radius` o `box-shadow` independiente — si cada uno tiene el suyo,
 visualmente se ve como dos ventanas superpuestas en vez de una sola pieza.
+(Con el cambio a pantalla completa de arriba, este riesgo baja mucho, pero
+si en algún momento se reintroduce algún tipo de panel, esta regla sigue
+aplicando.)
 
 **Criterio de aceptación**: captura de Playwright confirma un único borde
 redondeado continuo entre titlebar y body, sin gap ni doble sombra visible,
@@ -41,6 +65,23 @@ temas v1, no solo en cyberpunk.
 
 **Criterio de aceptación**: en ningún viewport (mobile incluido) el texto
 del terminal toca el borde de la pantalla sin padding.
+
+### Bug conocido a evitar: `body` con padding residual en mobile reintroduce el panel flotante — RESUELTO
+Revisión 2026-07-16: al implementar pantalla completa se sacó el padding
+de `body` en la regla base, pero quedó `padding: 0.75rem` en
+`@media (max-width: 600px)` sobre `body` (no sobre `.window`/`#terminal`).
+Como `.window` es `width: 100%` sin margen negativo, ese padding de mobile
+dejaba ver el fondo de `body` alrededor de `.window` — exactamente el bug
+que este spec revierte, pero solo visible en viewports chicos.
+
+Corregido por onboarding-ux: `body` ya no declara `padding` en ningún
+breakpoint (verificado en `src/style.css`, regla base línea 28 y
+`@media (max-width: 600px)` línea 410-413). El aire extra en mobile queda
+en `#terminal` (`padding: 1.25rem`), que es contenido, no panel.
+
+**Criterio de aceptación**: en `@media (max-width: 600px)`, `body` no
+declara `padding` (ni ningún otro valor que deje ver `--theme-bg` de
+`body` distinto del de `.window` alrededor del contenedor). — Cumplido.
 
 ## ASCII banner (implementa: onboarding-ux)
 - Logo ASCII de "NicolasOS" (o iniciales) se muestra antes de los chips de
@@ -148,10 +189,27 @@ con la misma identidad visual que el modo terminal, no como una página aparte.
   pero el link a la demo falta por completo.
 - **Espaciado y jerarquía**: separación clara entre secciones (about,
   proyectos, skills, contacto), no todo corrido en el mismo bloque de texto.
-- **Consistencia con el cromo de ventana**: si el modo terminal tiene panel
-  con bordes redondeados y barra de título, esta vista vive dentro del
-  mismo tipo de contenedor, no a pantalla completa sin marco.
+- **Consistencia con el cromo de ventana**: misma superficie a pantalla
+  completa que el modo terminal (ver "Cromo de ventana" arriba) — sin
+  panel flotante ni fondo visible alrededor, la barra de título superior
+  se mantiene igual en ambas vistas.
 
 **Criterio de aceptación**: cada proyecto en la vista normal muestra un
 link funcional a su demo (no solo el stack tecnológico), y el ASCII banner
 está presente en esta vista igual que en el boot de terminal.
+
+## Revisión 2026-07-16 (onboarding-ux: revert a pantalla completa) — APROBADO
+Revisado `src/style.css` contra "Cromo de ventana" y "Vista normal /
+fallback". Resultado:
+
+- `.window`: limpio, sin `max-width`/`box-shadow`/`border-radius` — OK.
+- `body` (regla base): sin padding ni flex de centrado — OK.
+- Padding de `#terminal`/`#fallback-content` (1.75rem) intacto — OK,
+  es contenido, no panel, según lo definido arriba.
+- `body { padding: 0.75rem }` residual en `@media (max-width: 600px)`
+  fue eliminado por onboarding-ux — ver "Bug conocido a evitar: `body`
+  con padding residual en mobile" arriba, marcado RESUELTO.
+
+Veredicto final: **aprobado**. El cambio a pantalla completa es fiel al
+spec en todos los breakpoints, sin fondo residual visible alrededor de
+`.window` en mobile ni en desktop.

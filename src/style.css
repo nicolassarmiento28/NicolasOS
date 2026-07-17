@@ -31,10 +31,6 @@ body {
   color: var(--theme-text);
   font-family: var(--theme-font);
   min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 1rem;
 }
 
 #input-line #prompt {
@@ -122,14 +118,13 @@ body {
 }
 
 /* cromo de ventana (specs/10-diseno-visual.md) — clases: se reutiliza en
-   #window (terminal) y #fallback-window (vista normal), mismo lenguaje visual. */
+   #window (terminal) y #fallback-window (vista normal), mismo lenguaje visual.
+   Pantalla completa, sin panel flotante: la terminal ES la página, no una
+   ventana sobre un fondo (revert explícito del panel centrado anterior). */
 .window {
   position: relative;
   width: 100%;
-  max-width: 960px;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  min-height: 100vh;
   background: var(--theme-bg);
 }
 
@@ -413,10 +408,6 @@ body {
 }
 
 @media (max-width: 600px) {
-  body {
-    padding: 0.75rem;
-  }
-
   #terminal {
     padding: 1.25rem;
   }
