@@ -140,7 +140,7 @@ describe("boot y onboarding-ux", () => {
     expect(input.style.width).toBe(`${1 + 1}ch`);
   });
 
-  it("cambiar a vista normal mientras matrix está activo lo detiene, no queda corriendo detrás (specs/06-effects-v2.md, bug conocido)", async () => {
+  it("cambiar a vista normal mientras matrix está activo lo deja corriendo detrás, no se detiene (specs/06-effects-v2.md)", async () => {
     await bootMain();
     const input = document.querySelector<HTMLInputElement>("#input")!;
     input.value = "matrix";
@@ -148,7 +148,25 @@ describe("boot y onboarding-ux", () => {
     expect(document.getElementById("matrix-canvas")).not.toBeNull();
 
     document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
-    expect(document.getElementById("matrix-canvas")).toBeNull();
+    expect(document.getElementById("matrix-canvas")).not.toBeNull();
+
+    document.querySelector<HTMLButtonElement>("#fallback-window .win-maximize")!.click();
+    expect(document.getElementById("matrix-canvas")).not.toBeNull();
+  });
+
+  it("al cambiar de vista, el canvas de matrix se remide al viewport actual (mobile: barra de direcciones dinámica, specs/06-effects-v2.md)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "matrix";
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 700, configurable: true });
+    document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
+
+    const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
+    expect(canvas.width).toBe(390);
+    expect(canvas.height).toBe(700);
   });
 
   it("carga la terminal con el tema 'dos' por defecto, no cyberpunk (specs/03-temas.md)", async () => {

@@ -7,7 +7,7 @@ import { COMMANDS, COMMAND_NAMES } from "./core/registry";
 import { applyTheme, DEFAULT_THEME, THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
 import { Analytics } from "./core/analytics";
-import { stopMatrix } from "./effects/matrix";
+import { resizeMatrix } from "./effects/matrix";
 import { profile, projects, skills, contact } from "./data/content";
 
 const history = new History();
@@ -249,19 +249,20 @@ function renderFallbackView(): string {
 }
 
 function openFallback(): void {
-  // matrix corre detrás de #terminal (z-index negativo); al entrar a vista
-  // normal ya no hay terminal encima tapándolo, así que queda visible
-  // "flotando" detrás del contenido normal si no se detiene acá.
-  stopMatrix();
+  // matrix corre detrás (z-index negativo) en ambas vistas, terminal y
+  // normal — no se detiene acá. Sí hay que remedir el viewport porque el
+  // cambio de vista puede mover la barra de direcciones en mobile.
   fallbackContent.innerHTML = renderFallbackView();
   fallbackWindow.hidden = false;
   win.hidden = true;
+  resizeMatrix();
 }
 
 function closeFallback(): void {
   fallbackWindow.hidden = true;
   win.hidden = false;
   input.focus();
+  resizeMatrix();
 }
 
 // controles de ventana estilo Windows (specs/10-diseno-visual.md): mismo

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { startMatrix, stopMatrix, isMatrixRunning } from "../../src/effects/matrix";
+import { startMatrix, stopMatrix, isMatrixRunning, resizeMatrix } from "../../src/effects/matrix";
 import { parseInput } from "../../src/core/parser";
 import { History } from "../../src/core/history";
 
@@ -93,6 +93,35 @@ describe("matrix effect", () => {
     const removes = removeSpy.mock.calls.filter((c) => c[0] === "resize").length;
     expect(adds).toBe(1);
     expect(removes).toBe(1);
+  });
+
+  it("resizeMatrix cubre el 100% del viewport actual, sin franjas (mobile: cambio de vista mueve la barra de direcciones)", () => {
+    startMatrix();
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 844, configurable: true });
+    resizeMatrix();
+    const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
+    expect(canvas.width).toBe(window.innerWidth);
+    expect(canvas.height).toBe(window.innerHeight);
+  });
+
+  it("resizeMatrix usa window.innerWidth aunque visualViewport.width sea menor (scrollbar en vista normal)", () => {
+    // Bug real: la vista normal (fallback) tiene contenido scrolleable que
+    // dispara un scrollbar clásico, y visualViewport.width lo excluye
+    // mientras innerWidth no — dejaba una franja de ~15px sin cubrir.
+    startMatrix();
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    Object.defineProperty(window, "visualViewport", {
+      value: { width: 375, height: 844, addEventListener: vi.fn(), removeEventListener: vi.fn() },
+      configurable: true,
+    });
+    resizeMatrix();
+    const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
+    expect(canvas.width).toBe(window.innerWidth);
+  });
+
+  it("resizeMatrix no rompe nada si matrix no está corriendo", () => {
+    expect(() => resizeMatrix()).not.toThrow();
   });
 
   it("no deja el listener de Escape colgado después de stopMatrix (sin fuga entre sesiones)", () => {

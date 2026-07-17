@@ -71,8 +71,23 @@ function handleResize(): void {
   canvas.height = viewportHeight();
 }
 
+/**
+ * Fuerza un remedido del canvas. Se llama al alternar entre vista terminal
+ * y vista normal: el DOM cambia (fallback se monta/desmonta) y en mobile
+ * eso puede mover la barra de direcciones sin disparar resize/visualViewport
+ * de forma confiable. No-op si matrix no está corriendo.
+ */
+export function resizeMatrix(): void {
+  handleResize();
+}
+
 function viewportWidth(): number {
-  return window.visualViewport?.width ?? window.innerWidth;
+  // window.innerWidth, no visualViewport.width: visualViewport excluye el
+  // ancho del scrollbar clásico, así que si la vista normal (con contenido
+  // scrolleable) dispara un scrollbar, visualViewport.width queda ~15px por
+  // debajo de innerWidth y deja una franja sin cubrir. innerWidth siempre
+  // es el ancho completo de la ventana, con o sin scrollbar.
+  return window.innerWidth;
 }
 
 function viewportHeight(): number {

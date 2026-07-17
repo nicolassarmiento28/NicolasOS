@@ -66,19 +66,19 @@ de pantalla.
 
 ### Bug conocido a evitar: matrix no cubre el viewport completo en mobile
 En mobile, tanto en vista terminal como en vista normal, el canvas de
-`matrix` deja franjas sin cubrir (arriba/costados) y además persiste
-visible detrás del contenido al entrar a la vista normal — debería
-detenerse o quedar oculto al cambiar de vista, no seguir corriendo debajo.
-Causas más probables: el canvas usa un tamaño fijo calculado en el primer
-render en vez de escuchar `resize`/cambios de viewport (común en mobile
-por la barra de direcciones del navegador que aparece/desaparece), y no
-hay lógica que pause/oculte el efecto al cambiar de vista con `view`/`□`.
+`matrix` deja franjas sin cubrir (arriba/costados). Esto pasa en **las
+dos vistas por igual** — `matrix` sigue corriendo al cambiar a vista
+normal (eso es el comportamiento esperado, no hay que detenerlo), pero en
+ninguna de las dos cubre el 100% del viewport en mobile. Causa más
+probable: el canvas usa un tamaño fijo calculado en el primer render en
+vez de escuchar `resize`/cambios de viewport (común en mobile por la
+barra de direcciones del navegador que aparece/desaparece), y ese cálculo
+de tamaño no se re-ejecuta al cambiar entre vista terminal y vista normal.
 
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
-390x844) confirma que el canvas cubre el 100% del alto y ancho visibles,
-sin franjas sin cubrir. Test de que cambiar a vista normal mientras
-`matrix` está activo detiene o oculta el efecto — no queda visible detrás
-del contenido de la vista normal.
+390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
+ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en
+vista normal (con `matrix` activo en ambas).
 
 ### Bug conocido a evitar: texto del input ilegible sobre matrix en windows-xp
 En el tema `windows-xp`, el color del prompt/texto tipeado (azul oscuro,
