@@ -33,6 +33,10 @@ espacios extra, mayúsculas y comandos vacíos. `history.ts` tiene test de
 navegación en ambas direcciones y de reset.
 
 ## Comandos v1
+> `experience`/`experiencia` se descartó a propósito (decisión del
+> usuario, no un gap) — ver `04-contenido.md` para el detalle, incluye
+> también sacar el campo `experience` del modelo de `profile` en `content.ts`.
+
 | comando | alias ES | comportamiento |
 |---|---|---|
 | help | ayuda | lista comandos, chips tappeables (ver 01-onboarding-ux.md) |
@@ -41,7 +45,6 @@ navegación en ambas direcciones y de reset.
 | projects | proyectos | lista numerada |
 | open <n> | abrir <n> | abre el link del proyecto n en nueva pestaña |
 | skills | — | grid de tecnologías |
-| experience | experiencia | timeline laboral |
 | resume / cv | cv | abre/descarga CV |
 | contact | contacto | email y forma de contacto |
 | github / linkedin | — | abren perfil en nueva pestaña |

@@ -228,4 +228,49 @@ describe("boot y onboarding-ux", () => {
     // la línea vieja sigue sin color inline: sigue leyendo la var actualizada.
     expect(echoLine.style.color).toBe("");
   });
+
+  it('ArrowUp x2 + ArrowDown x1 navega historial en el input real (DOM)', async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>('#input')!;
+    input.value = 'whoami';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    input.value = 'about';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(input.value).toBe('about');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(input.value).toBe('whoami');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    expect(input.value).toBe('about');
+  });
+
+  it('ejecutar comando nuevo resetea el indice de historial (ArrowUp vuelve al ultimo)', async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>('#input')!;
+    input.value = 'whoami';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    input.value = 'about';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    input.value = 'projects';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
+    expect(input.value).toBe('projects');
+  });
+
+  it('ArrowLeft/ArrowRight no interceptan el historial (comportamiento nativo)', async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>('#input')!;
+    input.value = 'whoami';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    const leftEvt = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true });
+    const rightEvt = new KeyboardEvent('keydown', { key: 'ArrowRight', cancelable: true });
+    input.value = 'hola';
+    const leftDefault = input.dispatchEvent(leftEvt);
+    const rightDefault = input.dispatchEvent(rightEvt);
+    expect(leftDefault).toBe(true);
+    expect(rightDefault).toBe(true);
+    expect(input.value).toBe('hola');
+  });
 });

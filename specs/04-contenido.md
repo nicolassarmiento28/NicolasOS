@@ -3,33 +3,42 @@
 ## Objetivo
 Datos reales del portafolio, tipados y centralizados en `src/data/content.ts`.
 
-## Datos confirmados por el usuario
-- [x] Bio (about / whoami) — provista, incluye rol, stack principal y foco en
-      herramientas de IA/agentes/spec-driven development.
-- [x] Proyectos: descripción, stack, link — 6 proyectos reales (SaasChatbot IA,
-      Dashboard Analítico de Wrestling, PetShop SPA + Webpay, VG Collection,
-      CineList, Space Runner), tomados de `portfolio/src/data/projects.json`.
-- [x] Skills por categoría — frontend, backend, y una categoría de IA/agentes
-      (LLMs, AI Agents, Spec-Driven Development, Claude Code), tomados de
-      `portfolio/src/data/skills.json` + confirmación del usuario.
-- [x] Email / contacto y URLs de GitHub y LinkedIn — provistos.
-- [ ] CV (archivo o link) — no provisto todavía, no bloquea el resto.
+## Estado real del contenido (sincronizado con capturas del build actual)
+Confirmado presente y con datos reales, NO placeholders — visto
+directamente en el sitio funcionando, no asumido:
+- [x] Bio (`about` / `whoami`) — "Nicolás Sarmiento — Full Stack Developer",
+      Viña del Mar, Chile, bio completa sobre React/TypeScript/Node.js/IA
+- [x] Proyectos — 6 confirmados con descripción, stack y comando `open`
+      funcionando: SaaSChatbot IA, Dashboard Analítico de Wrestling (WWE/AEW),
+      PetShop SPA + Webpay, VG Collection, CineList, Space Runner
+      (la lista original tenía 5 ítems distintos — confirmar con el usuario
+      si "Movie Search" pasó a ser "CineList" o son proyectos distintos)
+- [x] Skills por categoría — Frontend, Backend, IA/agentes, todos con
+      tecnologías reales, no placeholders
+- [x] Email / contacto — nicolas.sarmiento.jimenez@gmail.com confirmado
+- [x] URLs de GitHub y LinkedIn — comandos `github`/`linkedin` funcionando
 
-## Experiencia laboral: NO existe, decisión explícita del usuario
-El usuario confirmó que no tiene experiencia laboral formal. **No inventar,
-inferir ni completar esta sección con datos genéricos o placeholder.**
-El comando `experience` (ver `02-comandos-core.md`) debe eliminarse del
-registro de comandos — no debe existir un comando que muestre una timeline
-vacía o simulada. Si en el futuro el usuario consigue experiencia laboral
-real, se reabre este punto y se vuelve a agregar el comando.
+**Sin confirmar todavía — no asumir, verificar leyendo `content.ts` directamente:**
+- [ ] CV — el comando `resume`/`cv` muestra "Abriendo CV..." en las
+      capturas, pero eso solo confirma que el comando ejecuta algo, no que
+      `resumeUrl` apunte a un archivo real en vez de seguir en `"#"`.
+
+## Decisión: `experience`/`experiencia` descartado
+El comando `experience` nunca se implementó y **se confirma descartado a
+propósito**, no es un gap a resolver — decisión del usuario. Por
+consistencia, el campo `experience` (timeline laboral) también se saca
+del modelo de datos en `content.ts`: si no hay comando que lo muestre, no
+tiene sentido mantenerlo en la interfaz de `profile`. Ver también el
+mismo descarte reflejado en `02-comandos-core.md`.
 
 **Criterio de aceptación**: `content.ts` no tiene ningún valor `TODO`
-pendiente salvo el CV, cada proyecto cumple la interfaz `Project` (id, name,
-desc, stack, url), y no existe ningún campo ni comando de "experiencia
-laboral" en el contenido ni en el registro de comandos.
+pendiente, no tiene el campo `experience` en el modelo de `profile`, y
+cada proyecto cumple la interfaz `Project` (id, name, desc, stack, url)
+con una URL real, no `"#"`. Antes de marcar este dominio como completado,
+`content` (el subagente) debe leer `content.ts` directamente y confirmar
+el estado real de `resumeUrl` — no inferirlo de capturas de pantalla.
 
 ## Depende de
 Nada técnicamente, pero bloquea a `01-onboarding-ux.md` (vista fallback) y
 a `02-comandos-core.md` en la práctica (los comandos `about`, `projects`,
-`skills`, `contact` muestran este contenido; `experience` fue eliminado,
-ver sección anterior).
+`skills`, `contact` muestran este contenido).
