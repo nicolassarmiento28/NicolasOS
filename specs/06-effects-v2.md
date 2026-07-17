@@ -125,6 +125,34 @@ Causa más probable combinando los tres puntos: el canvas seguramente está
 usando `window.innerHeight`/`innerWidth` en vez de `visualViewport`, y/o
 no está multiplicando por `devicePixelRatio` al setear el buffer real.
 
+### Nuevo hallazgo: el efecto se corta específicamente al abrir el teclado virtual
+Con el teclado cerrado, `matrix` cubre el 100% del viewport correctamente.
+Al abrir el teclado (que dispara un resize de `visualViewport` al achicar
+el alto visible), la franja inferior recién visible queda negra, sin
+lluvia de código — solo la parte de arriba (dibujada antes del resize)
+se sigue viendo.
+
+**Causa**: redimensionar un canvas vía `canvas.width`/`canvas.height` en
+JS **limpia su buffer de dibujo automáticamente** (comportamiento nativo
+del elemento, no un bug de la lógica de animación). Si las columnas/gotas
+de la lluvia se calcularon UNA SOLA VEZ al iniciar el efecto (cantidad de
+columnas según el ancho, posición de caída según el alto de ESE momento),
+un resize que solo ajusta el tamaño del canvas sin volver a generar esas
+columnas para las nuevas dimensiones deja "huérfana" cualquier franja
+recién visible — no hay columnas asignadas ahí porque nunca se
+recalcularon.
+
+**Fix**: el handler de resize (el mismo de `visualViewport.resize` del
+punto 2 de arriba) debe, además de ajustar `canvas.width`/`canvas.height`,
+**volver a inicializar el arreglo de columnas/gotas** en base a las
+dimensiones nuevas — tratar cada resize como un mini-reinicio del grid de
+la animación, no solo un cambio pasivo de tamaño del elemento.
+
+**Criterio de aceptación**: captura de Playwright en viewport mobile que
+simula la apertura del teclado virtual (reduciendo `visualViewport.height`
+mientras `matrix` está activo) confirma que la franja recién visible
+también tiene lluvia de código, no queda negra.
+
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
 ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en

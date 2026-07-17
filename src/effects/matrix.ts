@@ -24,6 +24,25 @@ let generation = 0;
 // la conversión a píxeles físicos (ver applyCanvasSize).
 let logicalWidth = 0;
 let logicalHeight = 0;
+// Gotas de la animación (una por columna). Se regeneran en initDrops(), no
+// solo al arrancar: un resize (ej. teclado virtual mobile) cambia el buffer
+// del canvas, que el navegador limpia automáticamente al setear width/height
+// — sin regenerar acá, la franja recién visible queda negra sin lluvia.
+let drops: number[] = [];
+
+/**
+ * Ajusta el arreglo de gotas al número de columnas actual sin resetear las
+ * que ya existían: agrega columnas nuevas en 1 (arrancan cayendo) o recorta
+ * el excedente si el viewport se achicó. Preserva la caída en curso del resto.
+ */
+function initDrops(): void {
+  const columns = Math.floor(logicalWidth / FONT_SIZE);
+  if (columns > drops.length) {
+    while (drops.length < columns) drops.push(1);
+  } else if (columns < drops.length) {
+    drops.length = columns;
+  }
+}
 
 /** ¿Está la animación corriendo? Consultable por el comando para hacer toggle. */
 export function isMatrixRunning(): boolean {
@@ -84,8 +103,7 @@ export function startMatrix(): void {
 }
 
 function startDrawLoop(ctx: CanvasRenderingContext2D, myGeneration: number): void {
-  const columns = Math.floor(logicalWidth / FONT_SIZE);
-  const drops = new Array(columns).fill(1);
+  initDrops();
 
   function draw(): void {
     if (!ctx || !canvas || !running || generation !== myGeneration) return;
@@ -133,6 +151,10 @@ function applyCanvasSize(): void {
 function handleResize(): void {
   if (!canvas) return;
   applyCanvasSize();
+  // Setear canvas.width/height (dentro de applyCanvasSize) limpia el buffer
+  // nativamente — tratar el resize como un mini-reinicio del grid evita que
+  // la franja recién visible quede negra.
+  initDrops();
 }
 
 /**
@@ -145,7 +167,10 @@ export function resizeMatrix(): void {
   if (!canvas) return;
   // Igual que en startMatrix: esperar un frame para medir después de que el
   // cambio de vista (terminal <-> normal) termine de asentar el layout.
-  requestAnimationFrame(applyCanvasSize);
+  requestAnimationFrame(() => {
+    applyCanvasSize();
+    initDrops();
+  });
 }
 
 // El ancho no sufre el problema de la barra de direcciones dinámica (esa
