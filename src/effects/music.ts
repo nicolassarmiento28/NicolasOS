@@ -16,6 +16,10 @@ export function startMusic(): void {
   if (isMusicPlaying()) return;
 
   ctx = new AudioContext();
+  // mobile (iOS Safari) crea el AudioContext en estado "suspended" hasta que
+  // se resume sincrónicamente dentro del mismo gesto de usuario; sin esto,
+  // los osciladores arrancan pero no suena nada en mobile.
+  void ctx.resume();
   gainNode = ctx.createGain();
   gainNode.gain.value = VOLUME;
   gainNode.connect(ctx.destination);

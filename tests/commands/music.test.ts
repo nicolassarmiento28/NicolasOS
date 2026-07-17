@@ -17,6 +17,7 @@ class FakeAudioContext {
     };
   }
   close = vi.fn();
+  resume = vi.fn().mockResolvedValue(undefined);
 }
 // @ts-expect-error jsdom no implementa AudioContext
 globalThis.AudioContext = FakeAudioContext;

@@ -183,16 +183,31 @@ contenedor que muestra el texto tipeado tiene `width` fijo o `overflow: hidden`
 calculado para el estado vacío, y no se recalcula a tiempo con el primer
 carácter. Usar `width: auto` / `fit-content` en ese contenedor, y confirmar
 que no hay ninguna transformación CSS (`scale`, `rotate`) aplicada
-condicionalmente que solo afecte al primer render. Ocurre con más
-frecuencia en mobile ("a veces" según lo visto en dispositivo real) —
-probablemente por cómo el teclado virtual dispara eventos de `input`/
-`resize` de forma distinta a desktop; confirmar el fix específicamente
-con el teclado virtual abierto, no solo con teclado físico/desktop.
+condicionalmente que solo afecte al primer render.
+
+**El fix anterior resolvió el caso desktop — confirmado, no tocar esa
+parte.** Sigue roto específicamente en mobile/dispositivo real. Cualquier
+cambio nuevo debe ser mobile-specific (media query, detección de touch,
+lógica separada) y NO debe modificar el comportamiento ya funcionando en
+desktop — correr el test de desktop existente también después del cambio,
+para confirmar que sigue en verde y no hubo regresión. Revisar
+específicamente para el caso mobile:
+1. Los teclados virtuales mobile disparan eventos `compositionstart`/
+   `compositionupdate`/`compositionend` (por autocompletado/predicción de
+   texto), distintos a un simple evento `input` de desktop — si el
+   render del carácter tipeado depende solo de `input`, puede quedar
+   desincronizado con esos eventos de composición en el primer carácter.
+2. Confirmar que el fix de `width: auto`/`fit-content` realmente se
+   verificó en un viewport mobile con teclado virtual simulado (Playwright
+   permite emular esto) — si solo se probó con teclado físico/desktop, es
+   muy probable que el bug mobile nunca se haya reproducido en la revisión
+   anterior.
 
 **Criterio de aceptación**: captura de Playwright que escribe una sola
-letra y confirma que se renderiza completa y sin distorsión, igual que el
-resto del texto tipeado después — tanto en viewport desktop como en
-viewport mobile (ej. 390x844).
+letra y confirma que se renderiza completa y sin distorsión — en viewport
+mobile (390x844) CON
+emulación de teclado virtual/eventos de composición, no solo con `type()`
+estándar de Playwright (que puede no reproducir el bug real de mobile).
 
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.
@@ -200,33 +215,6 @@ viewport mobile (ej. 390x844).
 - Ambos son opcionales por tema — un tema como "windows xp" (v2) no debería
   llevar efecto CRT, es parte de la identidad de los temas tipo terminal
   (cyberpunk, linux, dos, hacker), no de todos.
-
-## Efecto matrix — continuidad del buffer en resize (implementa: effects-v2)
-El canvas de `matrix` (`src/effects/matrix.ts`) se remide (`applyCanvasSize`)
-en cada evento de `visualViewport.resize` y al alternar vista terminal/normal
-(`resizeMatrix`). Reasignar `canvas.width`/`canvas.height` limpia el buffer
-por completo (el navegador lo resetea, no lo preserva) — eso corta de golpe
-la estela de "rain" ya dibujada en vez de dejarla desvanecerse con el
-`fillRect(rgba(0,0,0,0.05))` normal del loop. En mobile, donde
-`visualViewport.resize` puede disparar más de una vez durante una misma
-interacción (scroll con barra de direcciones animándose), esto puede
-percibirse como un parpadeo/corte visible del efecto en vez de un simple
-recálculo de tamaño invisible para el usuario.
-
-- No es necesario preservar el contenido del buffer entre resizes (redibujar
-  toda la lluvia en el tamaño nuevo no vale la complejidad para un efecto
-  decorativo), pero si se nota un salto visible (flash a negro sólido, corte
-  abrupto de columnas a mitad de caída) en la verificación con Playwright,
-  hay que corregirlo — ej. limitando la frecuencia de recálculo con debounce,
-  o repoblando `drops` proporcionalmente al nuevo alto en vez de dejarlas en
-  su valor viejo (que puede quedar muy por encima o por debajo del canvas
-  nuevo tras un cambio grande de tamaño).
-
-**Criterio de aceptación**: captura/grabación de Playwright alternando vista
-terminal/normal y simulando resize de viewport con `matrix` activo confirma
-que no hay un frame en blanco/negro sólido perceptible ni un salto brusco de
-las columnas de caracteres — la transición de tamaño se siente continua, no
-como un "reset" del efecto.
 
 ## Micro-interacciones en chips (implementa: onboarding-ux)
 - Hover: `translateY(-1px)` + glow levemente más intenso.
@@ -277,5 +265,3 @@ scroll hasta el final de la página (ej. cerca del ASCII banner, al principio).
 **Criterio de aceptación**: cada proyecto en la vista normal muestra un
 link funcional a su demo (no solo el stack tecnológico), y el ASCII banner
 está presente en esta vista igual que en el boot de terminal.
-</content>
-</invoke>

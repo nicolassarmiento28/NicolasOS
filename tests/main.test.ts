@@ -140,6 +140,16 @@ describe("boot y onboarding-ux", () => {
     expect(input.style.width).toBe(`${1 + 1}ch`);
   });
 
+  it("mobile: compositionend (teclado virtual/IME) sincroniza el width igual que 'input', sin depender de ese evento (specs/10-diseno-visual.md)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "w";
+    // simula un teclado virtual mobile que dispara composition* en vez de
+    // (o antes que) "input" para el primer carácter.
+    input.dispatchEvent(new Event("compositionend"));
+    expect(input.style.width).toBe(`${1 + 1}ch`);
+  });
+
   it("cambiar a vista normal mientras matrix está activo lo deja corriendo detrás, no se detiene (specs/06-effects-v2.md)", async () => {
     await bootMain();
     const input = document.querySelector<HTMLInputElement>("#input")!;

@@ -50,6 +50,31 @@ Ver distinción base contra `linux` en `03-temas.md`.
 **Criterio de aceptación**: el audio nunca arranca sin que el usuario
 ejecute `music` explícitamente, y hay forma clara de apagarlo.
 
+### Bug conocido a evitar: la música no suena en mobile
+En mobile, ejecutar `music` no produce sonido (sí funciona en desktop).
+Causa más probable: las políticas de autoplay de navegadores mobile
+(especialmente iOS Safari) exigen que la reproducción de audio arranque
+**sincrónicamente dentro del mismo gesto del usuario** (el evento de touch/
+click que ejecuta el comando) — si el código que arranca el audio pasa por
+cualquier paso asíncrono antes de llamar a `play()`/`AudioContext.resume()`
+(un `await`, una promesa, un `setTimeout`), el navegador ya no lo reconoce
+como iniciado por el usuario y lo bloquea en silencio, sin error visible.
+
+Revisar:
+1. Que `AudioContext.resume()` (o `audio.play()`) se llame de forma
+   síncrona dentro del handler del evento que ejecuta el comando `music`,
+   no después de ningún `await`.
+2. Si se usa Web Audio API, confirmar que el `AudioContext` se crea (o se
+   resume si ya existía) en ese mismo call stack síncrono.
+3. Verificar en un dispositivo iOS real si es posible — el simulador/
+   Playwright mobile emulation no siempre reproduce fielmente las
+   políticas de autoplay reales de iOS Safari.
+
+**Criterio de aceptación**: test/captura en viewport mobile confirma que
+`music` produce audio audible (verificar que el `AudioContext` pasa a
+estado `running`, ya que Playwright no puede "escuchar" audio directamente
+pero sí puede verificar el estado del contexto).
+
 ## `matrix`
 - Animación de lluvia de código en canvas.
 - No debe bloquear el input del terminal mientras corre.

@@ -18,6 +18,7 @@ class FakeAudioContext {
     };
   }
   close = vi.fn();
+  resume = vi.fn().mockResolvedValue(undefined);
 }
 
 describe("music effect", () => {

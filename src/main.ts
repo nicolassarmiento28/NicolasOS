@@ -172,6 +172,14 @@ function syncInputWidth(): void {
 }
 
 input.addEventListener("input", syncInputWidth);
+// mobile: teclados virtuales (predictive text / autocorrect) disparan
+// compositionupdate/compositionend en vez de (o sin seguir con) "input" a
+// tiempo para el primer carácter — sin esto el ancho del input (fallback
+// en `ch`, ver comentario de syncInputWidth) queda desincronizado y el
+// primer carácter se ve cortado en mobile. No afecta desktop: ahí "input"
+// ya dispara a tiempo y estas llamadas extra son no-op (mismo cálculo).
+input.addEventListener("compositionupdate", syncInputWidth);
+input.addEventListener("compositionend", syncInputWidth);
 
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
