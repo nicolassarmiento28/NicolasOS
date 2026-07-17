@@ -112,6 +112,13 @@ describe("boot y onboarding-ux", () => {
     links.forEach((a) => expect(a.href).toMatch(/^https?:\/\//));
     expect(fallbackWindow.querySelector(".ascii-banner")).not.toBeNull();
   });
+  it('el botón de retorno de la vista normal dice exactamente "Volver a la terminal" (specs/10-diseno-visual.md)', async () => {
+    await bootMain();
+    document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
+    const btn = document.querySelector<HTMLButtonElement>("#fallback-window .btn-back-to-terminal")!;
+    expect(btn.textContent).toBe("Volver a la terminal");
+  });
+
   it("el input crece con el texto tipeado para que el cursor quede pegado al final (no fijo)", async () => {
     await bootMain();
     const input = document.querySelector<HTMLInputElement>("#input")!;
@@ -131,6 +138,17 @@ describe("boot y onboarding-ux", () => {
     // field-sizing: content (CSS) es quien realmente evita el corte donde
     // está soportado.
     expect(input.style.width).toBe(`${1 + 1}ch`);
+  });
+
+  it("cambiar a vista normal mientras matrix está activo lo detiene, no queda corriendo detrás (specs/06-effects-v2.md, bug conocido)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "matrix";
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(document.getElementById("matrix-canvas")).not.toBeNull();
+
+    document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
+    expect(document.getElementById("matrix-canvas")).toBeNull();
   });
 
   it("carga la terminal con el tema 'dos' por defecto, no cyberpunk (specs/03-temas.md)", async () => {

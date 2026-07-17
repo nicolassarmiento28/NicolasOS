@@ -72,6 +72,29 @@ describe("matrix effect", () => {
     expect(document.getElementById("matrix-canvas")).toBeNull();
   });
 
+  it("redimensiona el canvas al viewport visible en resize (mobile: barra de direcciones dinámica)", () => {
+    startMatrix();
+    const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 700, configurable: true });
+    window.dispatchEvent(new Event("resize"));
+    expect(canvas.width).toBe(390);
+    expect(canvas.height).toBe(700);
+  });
+
+  it("no deja el listener de resize colgado después de stopMatrix", () => {
+    const addSpy = vi.spyOn(window, "addEventListener");
+    const removeSpy = vi.spyOn(window, "removeEventListener");
+
+    startMatrix();
+    stopMatrix();
+
+    const adds = addSpy.mock.calls.filter((c) => c[0] === "resize").length;
+    const removes = removeSpy.mock.calls.filter((c) => c[0] === "resize").length;
+    expect(adds).toBe(1);
+    expect(removes).toBe(1);
+  });
+
   it("no deja el listener de Escape colgado después de stopMatrix (sin fuga entre sesiones)", () => {
     const addSpy = vi.spyOn(document, "addEventListener");
     const removeSpy = vi.spyOn(document, "removeEventListener");

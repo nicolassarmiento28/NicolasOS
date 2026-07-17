@@ -7,6 +7,7 @@ import { COMMANDS, COMMAND_NAMES } from "./core/registry";
 import { applyTheme, DEFAULT_THEME, THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
 import { Analytics } from "./core/analytics";
+import { stopMatrix } from "./effects/matrix";
 import { profile, projects, skills, contact } from "./data/content";
 
 const history = new History();
@@ -222,7 +223,7 @@ function renderFallbackView(): string {
   const ia = skills.ia.join(", ");
   return `
     <pre class="ascii-banner">${ASCII_BANNER}</pre>
-    <button type="button" class="btn-back-to-terminal">Volver a terminal</button>
+    <button type="button" class="btn-back-to-terminal">Volver a la terminal</button>
     <section class="fallback-section">
       <h1>${profile.name} — ${profile.title}</h1>
       <p>${profile.location}</p>
@@ -248,6 +249,10 @@ function renderFallbackView(): string {
 }
 
 function openFallback(): void {
+  // matrix corre detrás de #terminal (z-index negativo); al entrar a vista
+  // normal ya no hay terminal encima tapándolo, así que queda visible
+  // "flotando" detrás del contenido normal si no se detiene acá.
+  stopMatrix();
   fallbackContent.innerHTML = renderFallbackView();
   fallbackWindow.hidden = false;
   win.hidden = true;

@@ -17,8 +17,8 @@ export function startMatrix(): void {
 
   canvas = document.createElement("canvas");
   canvas.id = "matrix-canvas";
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = viewportWidth();
+  canvas.height = viewportHeight();
   canvas.style.position = "fixed";
   canvas.style.inset = "0";
   // #terminal es position:static (src/style.css) sin z-index propio, así
@@ -54,6 +54,29 @@ export function startMatrix(): void {
 
   rafId = requestAnimationFrame(draw);
   document.addEventListener("keydown", handleEscape);
+  // mobile: la barra de direcciones aparece/desaparece y cambia el viewport
+  // visible sin disparar "resize" de forma confiable en todos los browsers —
+  // visualViewport sí lo cubre. Fallback a window.resize donde no exista.
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", handleResize);
+  } else {
+    window.addEventListener("resize", handleResize);
+  }
+}
+
+/** Redimensiona el canvas al viewport visible actual (mobile: barra de direcciones dinámica). */
+function handleResize(): void {
+  if (!canvas) return;
+  canvas.width = viewportWidth();
+  canvas.height = viewportHeight();
+}
+
+function viewportWidth(): number {
+  return window.visualViewport?.width ?? window.innerWidth;
+}
+
+function viewportHeight(): number {
+  return window.visualViewport?.height ?? window.innerHeight;
 }
 
 function handleEscape(e: KeyboardEvent): void {
@@ -67,6 +90,11 @@ export function stopMatrix(): void {
     rafId = null;
   }
   document.removeEventListener("keydown", handleEscape);
+  if (window.visualViewport) {
+    window.visualViewport.removeEventListener("resize", handleResize);
+  } else {
+    window.removeEventListener("resize", handleResize);
+  }
   canvas?.remove();
   canvas = null;
 }
