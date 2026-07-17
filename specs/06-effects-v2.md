@@ -69,16 +69,43 @@ En mobile, tanto en vista terminal como en vista normal, el canvas de
 `matrix` deja franjas sin cubrir (arriba/costados). Esto pasa en **las
 dos vistas por igual** — `matrix` sigue corriendo al cambiar a vista
 normal (eso es el comportamiento esperado, no hay que detenerlo), pero en
-ninguna de las dos cubre el 100% del viewport en mobile. Causa más
-probable: el canvas usa un tamaño fijo calculado en el primer render en
-vez de escuchar `resize`/cambios de viewport (común en mobile por la
-barra de direcciones del navegador que aparece/desaparece), y ese cálculo
-de tamaño no se re-ejecuta al cambiar entre vista terminal y vista normal.
+ninguna de las dos cubre el 100% del viewport en mobile.
+
+**Ya se intentó un fix con `resize` listener y no alcanzó** — persiste en
+vista terminal. Hay que profundizar el diagnóstico, no repetir el mismo
+approach. Puntos a revisar, en orden:
+
+1. **Buffer del canvas vs tamaño CSS**: un canvas tiene dos tamaños
+   distintos — el de dibujo (`canvas.width`/`canvas.height`, en píxeles
+   reales) y el visual (`style.width`/`style.height`, CSS). Si solo se
+   setea el CSS y no el buffer real, el contenido dibujado puede quedar
+   escalado o recortado aunque el elemento "ocupe" el 100% visualmente.
+   Confirmar que `canvas.width`/`canvas.height` se setean explícitamente
+   en JS, multiplicados por `window.devicePixelRatio` (pantallas retina/mobile).
+
+2. **`100vh` no es confiable en mobile**: la barra de direcciones del
+   navegador que aparece/desaparece hace que `100vh` (CSS) no coincida
+   con el alto real visible. Usar `window.visualViewport.height` y
+   `window.visualViewport.width` (API específica para esto) en vez de
+   `window.innerHeight`/`innerWidth`, y escuchar el evento
+   `visualViewport.resize` además de (o en vez de) `window.resize`.
+
+3. **Recalcular en el momento correcto**: el cálculo de tamaño debe
+   correr después de que el DOM esté montado y visible, no antes — si
+   corre demasiado temprano (antes de que el navegador termine de
+   ajustar la barra de direcciones), toma un valor incorrecto que después
+   ningún `resize` corrige porque no vuelve a dispararse.
+
+Causa más probable combinando los tres puntos: el canvas seguramente está
+usando `window.innerHeight`/`innerWidth` en vez de `visualViewport`, y/o
+no está multiplicando por `devicePixelRatio` al setear el buffer real.
 
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
 ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en
-vista normal (con `matrix` activo en ambas).
+vista normal (con `matrix` activo en ambas). Verificar también en un
+segundo tamaño de viewport mobile distinto (ej. 428x926) para confirmar
+que no es un valor hardcodeado que solo funciona para un tamaño puntual.
 
 ### Bug conocido a evitar: texto del input ilegible sobre matrix en windows-xp
 En el tema `windows-xp`, el color del prompt/texto tipeado (azul oscuro,

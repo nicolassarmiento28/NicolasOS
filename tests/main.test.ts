@@ -163,6 +163,9 @@ describe("boot y onboarding-ux", () => {
     Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
     Object.defineProperty(window, "innerHeight", { value: 700, configurable: true });
     document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
+    // resizeMatrix mide en el siguiente frame (specs/06-effects-v2.md:
+    // esperar a que el layout de la nueva vista esté asentado antes de medir).
+    await new Promise((resolve) => requestAnimationFrame(resolve));
 
     const canvas = document.getElementById("matrix-canvas") as HTMLCanvasElement;
     expect(canvas.width).toBe(390);
