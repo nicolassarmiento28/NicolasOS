@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## Proyecto
 NicolasOS — portafolio de Nicolás Sarmiento simulando un sistema operativo
@@ -19,7 +19,7 @@ y el spec numerado del dominio correspondiente a la tarea.
 - `03-temas.md` — sistema de temas (cyberpunk, linux, dos en v1)
 - `04-contenido.md` — datos reales del portafolio
 - `05-seo-fallback.md` — SEO, OG tags, contenido en el DOM
-- `06-effects-v2.md` — matrix, music, temas extra (BLOQUEADO hasta cerrar el resto)
+- `06-effects-v2.md` — matrix, music, temas extra (completado)
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal
 - `10-diseno-visual.md` — dirección de arte transversal a temas y onboarding-ux
@@ -30,7 +30,7 @@ y el spec numerado del dominio correspondiente a la tarea.
 - `content` — datos reales del portafolio
 - `themes` — sistema de temas
 - `onboarding-ux` — boot, chips tappeables, fallback no técnico
-- `qa-testing` — valida cobertura de tests antes de aprobar un commit
+- `qa-testing` — valida cobertura de tests Y que `npm run build` pase, antes de aprobar un commit
 - `seguridad` — revisa XSS, links externos, npm audit, antes de cerrar cualquier fase
 - `devops` — build, scripts, config para Vercel (sin ejecutar el deploy)
 - `diseno-visual` — define y revisa dirección de arte (no implementa código)
@@ -81,11 +81,11 @@ sí especifica dominio o tarea, se puede ir directo al subagente:
    (`feat(commands): add projects command`) y se detiene. El usuario
    hace el commit y push a mano.
 5. Si falla → se corrige antes de seguir.
-6. No abrir `06-effects-v2.md` hasta que 01, 02, 03, 04, 05, 07 y 08 estén cerrados.
+6. `06-effects-v2.md` ya está completado — matrix, music y los temas
+   extra están implementados y verificados, no queda trabajo pendiente ahí.
 7. Desarrollo fase por fase: al cerrar todas las tareas de un dominio,
    orchestrator se detiene y espera confirmación explícita antes de
    arrancar el siguiente. No encadena dominios solo.
 
 ## No tocar
 - Config/deploy de Vercel — lo maneja el usuario.
-- `src/effects/` hasta que `06-effects-v2.md` esté habilitado explícitamente.

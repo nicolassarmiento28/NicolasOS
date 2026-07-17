@@ -24,7 +24,7 @@ contenido: proyectos, skills, experiencia y contacto.
 - [Desarrollo local](#desarrollo-local)
 - [Testing](#testing)
 - [Deploy](#deploy)
-- [Roadmap (v2)](#roadmap-v2)
+- [Estado del proyecto](#estado-del-proyecto)
 - [Contacto](#contacto)
 
 ---
@@ -141,7 +141,7 @@ de verdad del proyecto, dividida por dominio:
 | `03-temas.md` | Sistema de temas y tokens |
 | `04-contenido.md` | Datos reales del portafolio |
 | `05-seo-fallback.md` | SEO, OG tags, contenido en el DOM |
-| `06-effects-v2.md` | Matrix, music, temas extra — fase posterior |
+| `06-effects-v2.md` | Matrix, music, temas extra — completado |
 | `07-qa-testing.md` | Estándar de cobertura de tests, transversal |
 | `08-seguridad.md` | XSS, links externos, dependencias, transversal |
 | `10-diseno-visual.md` | Dirección de arte transversal a temas y onboarding-ux |
@@ -222,14 +222,23 @@ La skill `deploy-to-vercel` corre el checklist de pre-deploy (build, tests,
 
 ---
 
-## Roadmap (v2)
+## Estado del proyecto
 
-Bloqueado hasta cerrar por completo los dominios 01, 02, 03, 04, 05, 07 y
-08. Incluye:
-- Temas `windows-xp` y `hacker` (ya adelantados parcialmente en el build actual)
-- `music` con manejo correcto de políticas de autoplay mobile
-- `matrix` con soporte completo de resize en mobile (teclado virtual incluido)
-- Analítica de uso de comandos, sin cookies de terceros invasivas
+Completo. Los dominios `01` a `08` (MVP) y `06-effects-v2` (temas
+`windows-xp`/`hacker`, `music`, `matrix`) fueron auditados con evidencia
+real — `qa-testing` y `seguridad` corriendo cada criterio de aceptación
+uno por uno, no una revisión visual. La auditoría encontró y corrigió:
+
+- Bugs de mobile: posicionamiento del canvas de `matrix` con teclado
+  virtual, contraste de labels en `windows-xp`, primer carácter cortado
+  en el input.
+- `ambientRain.ts` (lluvia de fondo de `hacker`) sin soporte de resize.
+- Analítica de comandos guardando datos sin opt-in explícito — ahora
+  requiere activación explícita del usuario, mismo patrón que `music`.
+- El comando `experience`/`experiencia` se confirmó descartado a
+  propósito (no es un gap) y se sacó también del modelo de datos.
+
+No queda ningún ítem pendiente ni bloqueante conocido.
 
 ---
 

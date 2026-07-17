@@ -1,24 +1,17 @@
 # 06-effects-v2.md
 
-> **COMPLETADO.** Auditoría real (`qa-testing`/`seguridad`, criterio por
-> criterio, no revisión visual) encontró 2 bloqueantes — ambos resueltos y
-> re-verificados en verde:
-> - Temas `windows-xp`/`hacker`: todos los criterios PASAN.
-> - `matrix`: todos los criterios PASAN, incluido el fix de teclado virtual.
-> - `music`: PASA por test automatizado (AudioContext.resume() síncrono,
->   nunca autoplay). Verificación en iOS Safari real confirmada
->   manualmente por el usuario en su dispositivo.
-> - **Bloqueante 1 (resuelto)**: `src/effects/ambientRain.ts` no escuchaba
->   resize/`visualViewport`. Se agregó `handleResize` (mismo patrón que
->   `matrix.ts`), remide el canvas y regenera columnas incrementalmente.
->   Test en `tests/themes/ambientRain.test.ts` en verde.
-> - **Bloqueante 2 (resuelto)**: `src/core/analytics.ts` guardaba datos sin
->   opt-in. Se agregó comando `analytics on/off`, arranca desactivado por
->   default, `track()` es no-op sin opt-in explícito. Tests en
->   `tests/core/analytics.test.ts` y `tests/commands/analytics.test.ts`.
->
-> `qa-testing` y `seguridad` re-aprobaron ambos fixes de forma
-> independiente antes de este cierre.
+> **COMPLETADO — auditado con evidencia real, no impresión visual.**
+> `qa-testing` y `seguridad` corrieron cada criterio de aceptación uno por
+> uno. Resultado final:
+> - Temas `windows-xp`/`hacker`, `matrix`: todos los criterios PASAN.
+> - `music`: PASA por test automatizado + verificación manual en iOS
+>   Safari real confirmada por el usuario.
+> - `ambientRain.ts` (lluvia de `hacker`): bloqueante encontrado (no
+>   escuchaba resize/`visualViewport`) y **corregido** — mismo fix que
+>   `matrix.ts`.
+> - Analítica de comandos: bloqueante encontrado (guardaba en
+>   `localStorage` sin opt-in) y **corregido** — ahora requiere opt-in
+>   explícito, mismo patrón que `music`.
 
 ## Objetivo
 Sumar las features más "cosméticas" y de mayor riesgo de UX una vez que
