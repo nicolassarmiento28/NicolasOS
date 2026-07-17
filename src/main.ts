@@ -163,11 +163,17 @@ output.addEventListener("click", (e) => {
 // el input crece con el texto tipeado (width: Nch, ver style.css) para que
 // #cursor, inmediatamente después en el flujo normal, quede pegado al
 // último carácter en vez de a un punto fijo (bug conocido,
-// specs/10-diseno-visual.md). Es fallback: `field-sizing: content` en CSS
-// ya resuelve esto de forma nativa donde está soportado; el +1 de margen
-// evita que este cálculo en `ch` (que redondea hacia abajo) corte el
-// primer carácter tipeado en navegadores sin field-sizing (bug conocido).
+// specs/10-diseno-visual.md). Es fallback SOLO para navegadores sin
+// `field-sizing: content` (CSS): un `input.style.width` inline pisa en
+// cascada al `width: auto` + `field-sizing` del CSS aunque el navegador sí
+// lo soporte, forzando el cálculo en `ch` (que redondea hacia abajo) y
+// cortando el primer carácter tipeado en mobile — bug reportado, causa raíz
+// real de "la primera letra se ve cortada". Por eso el guard: si el
+// navegador soporta field-sizing, este listener no debe tocar el ancho.
+const supportsFieldSizing =
+  typeof CSS !== "undefined" && CSS.supports?.("field-sizing", "content") === true;
 function syncInputWidth(): void {
+  if (supportsFieldSizing) return;
   input.style.width = `${Math.max(input.value.length, 1) + 1}ch`;
 }
 

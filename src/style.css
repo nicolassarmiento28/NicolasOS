@@ -245,11 +245,10 @@ body {
   color: inherit;
   font: inherit;
   outline: none;
-  /* field-sizing:content mide el input al pixel exacto del glyph — en mobile
-     el render real (hinting/antialiasing) corta el borde del primer carácter
-     con ese ancho justo (bug reportado). Mismo margen de seguridad que ya
-     tiene el fallback en `ch` (+1), acá vía padding porque el ancho es fluido. */
-  padding-right: 0.4em;
+  /* margen de seguridad chico sobre el ancho exacto que mide field-sizing:
+     content. La causa real del corte del primer carácter en mobile era otra
+     (ver main.ts, supportsFieldSizing) — esto queda solo como buffer visual. */
+  padding-right: 0.15em;
   /* caret nativo oculto: #cursor (bloque parpadeante) lo reemplaza visualmente */
   caret-color: transparent;
 }

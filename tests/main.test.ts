@@ -88,7 +88,7 @@ describe("boot y onboarding-ux", () => {
     await bootMain();
     document.querySelector<HTMLButtonElement>("#window .win-close")!.click();
     const output = document.querySelector("#output")!;
-    expect(output.textContent).toContain("no podés cerrarme");
+    expect(output.textContent).toContain("no puedes cerrarme");
     const win = document.querySelector("#window") as HTMLElement;
     expect(win.hidden).toBe(false);
   });
