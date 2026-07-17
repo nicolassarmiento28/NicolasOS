@@ -125,33 +125,47 @@ Causa más probable combinando los tres puntos: el canvas seguramente está
 usando `window.innerHeight`/`innerWidth` en vez de `visualViewport`, y/o
 no está multiplicando por `devicePixelRatio` al setear el buffer real.
 
-### Nuevo hallazgo: el efecto se corta específicamente al abrir el teclado virtual
-Con el teclado cerrado, `matrix` cubre el 100% del viewport correctamente.
-Al abrir el teclado (que dispara un resize de `visualViewport` al achicar
-el alto visible), la franja inferior recién visible queda negra, sin
-lluvia de código — solo la parte de arriba (dibujada antes del resize)
-se sigue viendo.
+### Bug: el efecto se corta al abrir el teclado virtual — causa raíz confirmada
+**Esto reemplaza el diagnóstico anterior de este bug** (columnas/gotas sin
+regenerar). El fix de `initDrops()` que se commiteó ataca un síntoma que
+en la práctica casi no se nota — el problema real es de **posicionamiento
+del canvas**, no de contenido.
 
-**Causa**: redimensionar un canvas vía `canvas.width`/`canvas.height` en
-JS **limpia su buffer de dibujo automáticamente** (comportamiento nativo
-del elemento, no un bug de la lógica de animación). Si las columnas/gotas
-de la lluvia se calcularon UNA SOLA VEZ al iniciar el efecto (cantidad de
-columnas según el ancho, posición de caída según el alto de ESE momento),
-un resize que solo ajusta el tamaño del canvas sin volver a generar esas
-columnas para las nuevas dimensiones deja "huérfana" cualquier franja
-recién visible — no hay columnas asignadas ahí porque nunca se
-recalcularon.
+**Causa raíz confirmada**: en mobile (Chrome/Safari), cuando se abre el
+teclado virtual, el navegador hace scroll de la página para mantener
+visible el input enfocado. Esto hace que `visualViewport` se achique Y
+además **se desplace** (`visualViewport.offsetTop` deja de ser `0`) — pero
+el *layout viewport* (el sistema de referencia de `position: fixed`) no
+cambia. Un elemento `position: fixed; inset: 0` sigue anclado al origen
+`(0,0)` del layout viewport, no al área visualmente visible.
 
-**Fix**: el handler de resize (el mismo de `visualViewport.resize` del
-punto 2 de arriba) debe, además de ajustar `canvas.width`/`canvas.height`,
-**volver a inicializar el arreglo de columnas/gotas** en base a las
-dimensiones nuevas — tratar cada resize como un mini-reinicio del grid de
-la animación, no solo un cambio pasivo de tamaño del elemento.
+En `src/effects/matrix.ts`, `applyCanvasSize()` (líneas 137-148) redimensiona
+el canvas usando `visualViewport.height` (correctamente, más chico), pero
+**nunca lee ni aplica `visualViewport.offsetTop`**. Resultado: el canvas
+queda del tamaño correcto pero posicionado en el lugar equivocado — cubre
+`[0, visualViewport.height]` en coordenadas del layout viewport, mientras
+que lo que el usuario ve en pantalla es
+`[offsetTop, offsetTop + visualViewport.height]`. La franja inferior de la
+pantalla real queda fuera del canvas — por eso se ve negra, no porque
+falten gotas ahí.
 
-**Criterio de aceptación**: captura de Playwright en viewport mobile que
-simula la apertura del teclado virtual (reduciendo `visualViewport.height`
-mientras `matrix` está activo) confirma que la franja recién visible
-también tiene lluvia de código, no queda negra.
+**Fix**: en `applyCanvasSize()`/`handleResize()`, además de ajustar el
+tamaño, aplicar la posición del canvas seteando
+`canvas.style.transform = translate(${visualViewport.offsetLeft}px, ${visualViewport.offsetTop}px)`
+(o ajustar `top`/`left` en vez de depender solo de `inset: 0`), para que
+el canvas siga al viewport visual en posición, no solo en tamaño. Esto
+debe correr en el mismo handler que ya escucha `visualViewport.resize`,
+agregando también el caso de `visualViewport.scroll` si el offset puede
+cambiar sin que cambie el tamaño.
+
+**Criterio de aceptación**: captura de Playwright que simula la apertura
+del teclado virtual (reduciendo `visualViewport.height` Y seteando
+`visualViewport.offsetTop` a un valor mayor a 0) confirma que el canvas
+se reposiciona junto con el viewport visual — la franja inferior de la
+pantalla real sigue cubierta por la animación, sin negro. Confirmar
+también que `initDrops()` (el fix anterior) se mantiene, ya que sigue
+siendo válido para el caso de regeneración de contenido tras resize, solo
+que no era la causa de este bug específico.
 
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y

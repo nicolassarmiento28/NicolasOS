@@ -97,6 +97,10 @@ export function startMatrix(): void {
   // visualViewport sí lo cubre. Fallback a window.resize donde no exista.
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", handleResize);
+    // El offset puede cambiar sin cambiar el tamaño (ej. el usuario sigue
+    // escribiendo y el viewport visual se reposiciona) — "resize" solo no
+    // alcanza, hace falta también "scroll" del visualViewport.
+    window.visualViewport.addEventListener("scroll", handleViewportScroll);
   } else {
     window.addEventListener("resize", handleResize);
   }
@@ -145,6 +149,26 @@ function applyCanvasSize(): void {
   canvas.height = Math.round(logicalHeight * dpr);
   const ctx = canvas.getContext("2d");
   ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  applyCanvasOffset();
+}
+
+// Al abrir el teclado virtual, el navegador scrollea la página para mantener
+// el input enfocado visible: visualViewport se achica Y se desplaza
+// (offsetTop > 0), pero el layout viewport (referencia de position:fixed) no
+// cambia — el canvas queda del tamaño correcto pero mal posicionado, dejando
+// la franja inferior real (fuera del canvas) negra. Compensamos con
+// translate() en vez de top/left para no pelear con inset:0 ya seteado.
+function applyCanvasOffset(): void {
+  if (!canvas) return;
+  const vv = window.visualViewport;
+  const x = vv?.offsetLeft ?? 0;
+  const y = vv?.offsetTop ?? 0;
+  canvas.style.transform = `translate(${x}px, ${y}px)`;
+}
+
+/** Reposiciona el canvas sin tocar tamaño ni gotas (ver applyCanvasOffset). */
+function handleViewportScroll(): void {
+  applyCanvasOffset();
 }
 
 /** Redimensiona el canvas al viewport visible actual (mobile: barra de direcciones dinámica). */
@@ -199,6 +223,7 @@ export function stopMatrix(): void {
   document.removeEventListener("keydown", handleEscape);
   if (window.visualViewport) {
     window.visualViewport.removeEventListener("resize", handleResize);
+    window.visualViewport.removeEventListener("scroll", handleViewportScroll);
   } else {
     window.removeEventListener("resize", handleResize);
   }
