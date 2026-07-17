@@ -177,38 +177,35 @@ en el input y confirma que el cursor aparece inmediatamente después del
 último carácter, no en una posición fija.
 
 ### Bug conocido a evitar: primer carácter tipeado se ve cortado/deformado
-Al escribir la primera letra en el input, aparece visualmente cortada o
-deformada (no es el cursor, es el carácter en sí). Causa más probable: el
-contenedor que muestra el texto tipeado tiene `width` fijo o `overflow: hidden`
-calculado para el estado vacío, y no se recalcula a tiempo con el primer
-carácter. Usar `width: auto` / `fit-content` en ese contenedor, y confirmar
-que no hay ninguna transformación CSS (`scale`, `rotate`) aplicada
-condicionalmente que solo afecte al primer render.
+**Causa raíz confirmada** (ya no es hipótesis, esto reemplaza cualquier
+diagnóstico anterior de este bug): `syncInputWidth()` en `main.ts` setea
+`input.style.width` en cada evento, calculado en unidades `ch`. Ese estilo
+inline gana en cascada por sobre `field-sizing: content` del CSS (que solo
+aplica cuando `width` es `auto`) — en los dispositivos donde `field-sizing`
+sí está soportado nativamente, nunca llega a usarse porque el JS lo pisa
+primero. El cálculo en `ch` redondea/trunca, y por eso el primer carácter
+(ej. una "E" mayúscula) se corta — literalmente le falta ancho para
+renderizarse completo.
 
-**Causa raíz confirmada (no es desync de eventos de composición):**
-`field-sizing: content` mide el `#input` al pixel exacto del ancho del
-glyph. Ese ancho justo no deja margen para el hinting/antialiasing del
-render real en mobile, y el borde del carácter queda recortado — aunque
-el ancho ya se haya actualizado a tiempo (se confirmó vía
-`getBoundingClientRect` vs `scrollWidth`/`measureText` en Playwright que
-el valor computado coincide con el contenido, el corte es de render, no
-de timing). Los listeners de `compositionupdate`/`compositionend` en
-`main.ts` (`syncInputWidth`) siguen siendo necesarios como fallback en
-`ch` para navegadores sin `field-sizing`, pero no son la causa de este
-bug específico.
+**Fix**:
+1. Antes de que `syncInputWidth()` toque `input.style.width`, verificar
+   soporte nativo con `CSS.supports('field-sizing', 'content')`. Si el
+   navegador lo soporta, NO setear `width` inline en absoluto — dejar que
+   `field-sizing: content` del CSS haga el trabajo sin interferencia.
+2. Solo en navegadores SIN soporte de `field-sizing` (fallback), mantener
+   el cálculo en JS, pero corregido para no redondear hacia abajo — sumar
+   un margen de al menos `1ch` extra al resultado, para que ningún
+   carácter quede al límite exacto del ancho calculado.
 
-**Fix**: `padding-right: 0.4em` en `#input` (`src/style.css`), como
-margen de seguridad sobre el ancho exacto que calcula `field-sizing:
-content`. Si se ajusta este valor, mantenerlo lo bastante grande para
-cubrir el peor caso de hinting en fuentes monoespaciadas reales de
-dispositivo, no solo en el viewport emulado de Playwright.
+Un fix de padding/margin NO resuelve esto — el problema es el ancho base
+en `ch` calculado por JS, no el espaciado alrededor del texto.
 
-**Criterio de aceptación**: captura de Playwright que escribe una sola
-letra y confirma que se renderiza completa y sin distorsión — en viewport
-mobile (390x844). Si se reporta que sigue viéndose cortado en un
-dispositivo real después de este fix, subir `padding-right` en vez de
-reintroducir lógica de composition-event, salvo que se confirme con
-evidencia (no solo el síntoma) que el desync de eventos es la causa.
+**Criterio de aceptación**: test que confirma que en navegadores con
+soporte de `field-sizing`, `input.style.width` permanece sin setear
+(vacío o `auto`) después de `syncInputWidth()`. Captura de Playwright que
+escribe una única "E" mayúscula como primer carácter y confirma que se
+renderiza completa (con su asta vertical), tanto en mobile como en
+desktop — la "E" es el caso específico que expuso el bug.
 
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.
