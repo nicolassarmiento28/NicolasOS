@@ -298,18 +298,11 @@ body {
   transform: scale(0.97);
 }
 
-/* grupo "extra" (easter eggs): menos peso visual que las acciones primarias */
+/* grupo "extra" (easter eggs): mismo contraste que el resto de categorías
+   (specs/10-diseno-visual.md) — la única diferenciación permitida es un
+   tamaño levemente menor, nunca menos color/opacity. */
 .chip-extra {
-  border-color: var(--dim);
-  color: var(--dim);
   font-size: 0.9em;
-}
-
-.chip-extra:hover,
-.chip-extra:focus-visible {
-  background: var(--dim);
-  color: var(--theme-bg);
-  box-shadow: 0 0 10px var(--dim);
 }
 
 /* Controles de ventana estilo Windows (specs/10-diseno-visual.md): `_ □ X`
