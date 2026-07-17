@@ -18,6 +18,7 @@ const ALIASES: Map<string, string> = new Map([
   ["matriz", "matrix"],
   ["musica", "music"],
   ["estadisticas", "stats"],
+  ["vista", "view"],
 ]);
 
 /** Convierte una línea de input en { cmd, args }. Tolera mayúsculas, espacios extra y alias ES. */

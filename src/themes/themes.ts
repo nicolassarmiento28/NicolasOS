@@ -39,9 +39,6 @@ export interface ThemeTokens {
    * detrás del panel de terminal — distinto del comando `matrix` (easter egg a pantalla
    * completa). Ver src/themes/ambientRain.ts. */
   ambientRain: boolean;
-  /** Controles de ventana estilo Windows (`_ □ X`) en la titlebar. false solo en
-   * linux, que mantiene su barra simple sin cromo (specs/10-diseno-visual.md). */
-  showWindowControls: boolean;
 }
 
 const GLOW_PX: Record<ThemeTokens["glowIntensity"], string> = {
@@ -97,7 +94,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
-    showWindowControls: true,
   },
   linux: {
     bg: "#000000",
@@ -114,7 +110,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
-    showWindowControls: false,
   },
   dos: {
     bg: "#000000",
@@ -131,7 +126,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
-    showWindowControls: true,
   },
   "windows-xp": {
     bg: "#ece9d8",
@@ -149,7 +143,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
-    showWindowControls: true,
   },
   // hacker: implementado según specs/06-effects-v2.md (usuario confirmó que ya
   // está en producción pese al bloqueo formal del spec — se corrige acá en vez
@@ -170,7 +163,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     flicker: true,
     cursorStyle: "breathe",
     ambientRain: true,
-    showWindowControls: true,
   },
 };
 
@@ -204,10 +196,6 @@ export function applyTheme(name: string): boolean {
   root.style.setProperty(
     "--theme-titlebar-dots",
     tokens.showTitlebarDots ? "flex" : "none",
-  );
-  root.style.setProperty(
-    "--theme-window-controls",
-    tokens.showWindowControls ? "flex" : "none",
   );
   root.dataset.themeFlicker = tokens.flicker ? "1" : "0";
   root.dataset.cursorStyle = tokens.cursorStyle;

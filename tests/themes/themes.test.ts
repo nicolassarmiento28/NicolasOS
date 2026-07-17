@@ -18,9 +18,6 @@ describe("applyTheme", () => {
       expect(root.style.getPropertyValue("--theme-titlebar-dots")).toBe(
         tokens.showTitlebarDots ? "flex" : "none",
       );
-      expect(root.style.getPropertyValue("--theme-window-controls")).toBe(
-        tokens.showWindowControls ? "flex" : "none",
-      );
     }
   });
 
@@ -34,7 +31,6 @@ describe("applyTheme", () => {
     expect(THEMES.linux.flicker).toBe(false);
     expect(THEMES.linux.ambientRain).toBe(false);
     expect(THEMES.linux.cursorStyle).toBe("blink");
-    expect(THEMES.linux.showWindowControls).toBe(false);
 
     // hacker (specs/06-effects-v2.md): efecto máximo, MÁS elementos que linux
     // no tiene en absoluto (flicker, cursor "breathe", lluvia ambiental).
@@ -44,13 +40,6 @@ describe("applyTheme", () => {
     expect(THEMES.hacker.flicker).toBe(true);
     expect(THEMES.hacker.ambientRain).toBe(true);
     expect(THEMES.hacker.cursorStyle).toBe("breathe");
-    expect(THEMES.hacker.showWindowControls).toBe(true);
-  });
-
-  it("showWindowControls es false solo en linux (resto: true)", () => {
-    for (const [name, tokens] of Object.entries(THEMES)) {
-      expect(tokens.showWindowControls).toBe(name !== "linux");
-    }
   });
 
   it("hacker aplica flicker y cursorStyle como data attributes en documentElement", () => {

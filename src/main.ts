@@ -154,6 +154,10 @@ function handleSubmit(raw: string, echo = true): void {
     output.innerHTML = "";
     return;
   }
+  if (result.toggleView) {
+    win.hidden ? closeFallback() : openFallback();
+    return;
+  }
   if (result.output) printLine(result.output, "", result.html);
 }
 
@@ -265,13 +269,12 @@ function closeFallback(): void {
 }
 
 // controles de ventana estilo Windows (specs/10-diseno-visual.md): mismo
-// trío `_ □ X` en ambas titlebars (terminal y vista normal). `□` reemplaza
-// al viejo botón "Vista normal"/"Vista terminal" — es la única forma de
-// cambiar de vista ahora. `_` y `X` son easter eggs sin acción real, se
-// resuelven con delegación sobre `document` para cubrir los dos titlebars
-// sin repetir listeners por botón. Ocultos en `linux` vía
-// `--theme-window-controls: none` (src/themes/themes.ts), así que en ese
-// tema el trío no existe en absoluto (ni siquiera clickeable).
+// trío `_ □ X` en ambas titlebars (terminal y vista normal), universal a
+// todos los temas (specs/03-temas.md). `□` reemplaza al viejo botón "Vista
+// normal"/"Vista terminal" — es la única forma de cambiar de vista ahora.
+// `_` y `X` son easter eggs sin acción real, se resuelven con delegación
+// sobre `document` para cubrir los dos titlebars sin repetir listeners por
+// botón.
 document.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
   if (target.closest(".win-maximize")) {

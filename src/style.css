@@ -18,7 +18,6 @@
   --theme-scanlines-opacity: 0;
   --theme-chip-radius: 0;
   --theme-titlebar-dots: flex;
-  --theme-window-controls: flex;
   --dim: rgba(255, 255, 255, 0.5);
 }
 
@@ -330,10 +329,9 @@ body {
 }
 
 /* Controles de ventana estilo Windows (specs/10-diseno-visual.md): `_ □ X`
-   alineados a la derecha, ocultos por completo en linux vía
-   --theme-window-controls (src/themes/themes.ts, showWindowControls). */
+   alineados a la derecha, universales a todos los temas (specs/03-temas.md). */
 .window-controls {
-  display: var(--theme-window-controls);
+  display: flex;
   margin-left: auto;
   gap: 0.4rem;
 }

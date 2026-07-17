@@ -15,6 +15,7 @@ import { sudoCommand } from "../commands/sudo";
 import { matrixCommand } from "../commands/matrix";
 import { musicCommand } from "../commands/music";
 import { statsCommand } from "../commands/stats";
+import { viewCommand } from "../commands/view";
 
 // registro de comandos: firma estándar (args) => CommandResult, según
 // src/commands/types.ts. Fuente única de verdad — main.ts despacha desde
@@ -38,6 +39,7 @@ export const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
   matrix: matrixCommand,
   music: musicCommand,
   stats: statsCommand,
+  view: viewCommand,
 };
 
 // nombres de comandos reales, usados para sugerencias de typo (ver src/core/suggest.ts)

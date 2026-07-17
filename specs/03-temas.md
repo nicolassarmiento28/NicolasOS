@@ -19,16 +19,18 @@ redondeados, titlebar con puntos), sin ninguna diferencia real más allá
 del tono de color. Deben diferenciarse en identidad, no solo en hex:
 
 - **linux**: verde apagado (`#33ff33`), CERO `text-shadow`/glow, CERO
-  scanlines, chips con `border-radius: 0`, titlebar SIN los 3 puntos de
-  colores (barra simple, casi invisible — texto plano, sin cromo decorativo).
+  scanlines, chips con `border-radius: 0`. Los controles de ventana
+  estilo Windows (`_ □ X`) SÍ están presentes, igual que en el resto de
+  los temas — la austeridad de linux se expresa en ausencia de glow y
+  scanlines, no en la barra de título.
 - **hacker** (v2): verde saturado tipo Matrix (`#00ff41`), `text-shadow`
   marcado, scanlines visibles, chips redondeados con glow en hover,
   titlebar con los 3 puntos y glow en los bordes.
 
 **Criterio de aceptación**: captura de Playwright confirma que linux no
-tiene glow, no tiene scanlines, chips rectos, y sin puntos de colores en
-el titlebar — visualmente distinguible de hacker sin mirar el nombre del
-tema.
+tiene glow, no tiene scanlines, y chips rectos — visualmente distinguible
+de hacker sin mirar el nombre del tema (los controles de ventana ya no
+son parte de esta distinción, ambos los tienen).
 
 ## Tema por defecto
 Al cargar la terminal por primera vez (sin tema elegido en la sesión), el
@@ -45,11 +47,11 @@ visualmente el tema dos activo.
   acento, fuente, estilo de titlebar).
 - `applyTheme()` setea variables CSS custom properties sobre `documentElement`.
 - El modelo `Theme` se extiende con: `glowIntensity` (`none` | `subtle` | `strong`),
-  `scanlinesIntensity` (`none` | `subtle` | `visible`), `chipRadius`
-  (`sharp` | `rounded`), y `showWindowControls` (boolean — `false` solo
-  en `linux`, `true` en el resto; ver controles estilo Windows en
-  `10-diseno-visual.md`) — para que estas diferencias sean tokens
-  configurables por tema, no CSS hardcodeado condicional al nombre del tema.
+  `scanlinesIntensity` (`none` | `subtle` | `visible`), y `chipRadius`
+  (`sharp` | `rounded`) — para que estas diferencias sean tokens
+  configurables por tema, no CSS hardcodeado condicional al nombre del
+  tema. Los controles de ventana (`_ □ X`) son universales a todos los
+  temas, no necesitan un flag por tema — ver `10-diseno-visual.md`.
 
 ### Bug conocido a evitar: color hardcodeado que ignora el tema activo
 En el tema `windows-xp`, el texto `nicolas@os` en las líneas de comandos

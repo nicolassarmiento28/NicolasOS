@@ -78,14 +78,14 @@ describe("boot y onboarding-ux", () => {
     expect(win.hidden).toBe(false);
   });
 
-  it("el tema linux no muestra los controles de ventana (_ □ X)", async () => {
+  it("el tema linux también muestra los controles de ventana (_ □ X), universales a todos los temas", async () => {
     await bootMain();
     const input = document.querySelector<HTMLInputElement>("#input")!;
     input.value = "theme linux";
     input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-    expect(document.documentElement.style.getPropertyValue("--theme-window-controls")).toBe(
-      "none",
-    );
+    const controls = document.querySelector<HTMLElement>("#window .window-controls")!;
+    expect(controls).not.toBeNull();
+    expect(controls.querySelector(".win-close")).not.toBeNull();
   });
 
   it("cada proyecto en la vista normal muestra un link funcional a su demo y el ASCII banner está presente", async () => {

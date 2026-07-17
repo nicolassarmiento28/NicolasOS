@@ -8,7 +8,7 @@ import { COMMAND_NAMES } from "../core/registry";
 const CATEGORIES: { label: string; cmds: string[]; extra?: boolean }[] = [
   { label: "info", cmds: ["about", "whoami", "skills", "projects"] },
   { label: "contacto", cmds: ["contact", "github", "linkedin", "resume"] },
-  { label: "sistema", cmds: ["theme", "clear", "history"] },
+  { label: "sistema", cmds: ["theme", "clear", "history", "view"] },
   { label: "extra", cmds: ["sudo", "matrix", "music", "stats"], extra: true },
 ];
 
