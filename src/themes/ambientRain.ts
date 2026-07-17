@@ -11,9 +11,31 @@ const FONT_SIZE = 14;
 let canvas: HTMLCanvasElement | null = null;
 let rafId: number | null = null;
 let frame = 0;
+let drops: number[] = [];
 
 export function isAmbientRainRunning(): boolean {
   return rafId !== null;
+}
+
+/** Ajusta drops al número de columnas actual sin resetear las que ya existían. */
+function syncDrops(): void {
+  if (!canvas) return;
+  const columns = Math.floor(canvas.width / FONT_SIZE);
+  if (columns > drops.length) {
+    while (drops.length < columns) drops.push(Math.random() * -50);
+  } else if (columns < drops.length) {
+    drops.length = columns;
+  }
+}
+
+// window.resize (a diferencia del visualViewport resize/scroll de
+// src/effects/matrix.ts) es un evento único explícito, no una ráfaga —
+// no hace falta debounce (mismo criterio documentado en matrix.ts).
+function handleResize(): void {
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  syncDrops();
 }
 
 /** Arranca la lluvia ambiental (no-op si ya corre o si el usuario prefiere menos movimiento). */
@@ -35,11 +57,12 @@ export function startAmbientRain(): void {
   canvas.style.pointerEvents = "none";
   document.body.appendChild(canvas);
 
+  drops = [];
+  syncDrops();
+  window.addEventListener("resize", handleResize);
+
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-
-  const columns = Math.floor(canvas.width / FONT_SIZE);
-  const drops = new Array(columns).fill(0).map(() => Math.random() * -50);
 
   function draw(): void {
     if (!ctx || !canvas) return;
@@ -70,6 +93,7 @@ export function stopAmbientRain(): void {
     cancelAnimationFrame(rafId);
     rafId = null;
   }
+  window.removeEventListener("resize", handleResize);
   canvas?.remove();
   canvas = null;
 }

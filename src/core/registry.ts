@@ -15,6 +15,7 @@ import { sudoCommand } from "../commands/sudo";
 import { matrixCommand } from "../commands/matrix";
 import { musicCommand } from "../commands/music";
 import { statsCommand } from "../commands/stats";
+import { analyticsCommand } from "../commands/analytics";
 import { viewCommand } from "../commands/view";
 
 // registro de comandos: firma estándar (args) => CommandResult, según
@@ -39,6 +40,7 @@ export const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
   matrix: matrixCommand,
   music: musicCommand,
   stats: statsCommand,
+  analytics: analyticsCommand,
   view: viewCommand,
 };
 

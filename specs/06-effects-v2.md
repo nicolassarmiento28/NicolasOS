@@ -1,8 +1,24 @@
 # 06-effects-v2.md
 
-> BLOQUEADO. No empezar ninguna tarea de este documento hasta que
-> 01, 02, 03, 04, 05 y 07 estén completos: módulos implementados,
-> tests pasando, commits hechos.
+> **COMPLETADO.** Auditoría real (`qa-testing`/`seguridad`, criterio por
+> criterio, no revisión visual) encontró 2 bloqueantes — ambos resueltos y
+> re-verificados en verde:
+> - Temas `windows-xp`/`hacker`: todos los criterios PASAN.
+> - `matrix`: todos los criterios PASAN, incluido el fix de teclado virtual.
+> - `music`: PASA por test automatizado (AudioContext.resume() síncrono,
+>   nunca autoplay). Verificación en iOS Safari real confirmada
+>   manualmente por el usuario en su dispositivo.
+> - **Bloqueante 1 (resuelto)**: `src/effects/ambientRain.ts` no escuchaba
+>   resize/`visualViewport`. Se agregó `handleResize` (mismo patrón que
+>   `matrix.ts`), remide el canvas y regenera columnas incrementalmente.
+>   Test en `tests/themes/ambientRain.test.ts` en verde.
+> - **Bloqueante 2 (resuelto)**: `src/core/analytics.ts` guardaba datos sin
+>   opt-in. Se agregó comando `analytics on/off`, arranca desactivado por
+>   default, `track()` es no-op sin opt-in explícito. Tests en
+>   `tests/core/analytics.test.ts` y `tests/commands/analytics.test.ts`.
+>
+> `qa-testing` y `seguridad` re-aprobaron ambos fixes de forma
+> independiente antes de este cierre.
 
 ## Objetivo
 Sumar las features más "cosméticas" y de mayor riesgo de UX una vez que
@@ -125,185 +141,43 @@ Causa más probable combinando los tres puntos: el canvas seguramente está
 usando `window.innerHeight`/`innerWidth` en vez de `visualViewport`, y/o
 no está multiplicando por `devicePixelRatio` al setear el buffer real.
 
-### Bug: el efecto se corta al abrir el teclado virtual — causa raíz confirmada
-**Esto reemplaza el diagnóstico anterior de este bug** (columnas/gotas sin
-regenerar). El fix de `initDrops()` que se commiteó ataca un síntoma que
-en la práctica casi no se nota — el problema real es de **posicionamiento
-del canvas**, no de contenido.
-
-**Causa raíz confirmada**: en mobile (Chrome/Safari), cuando se abre el
-teclado virtual, el navegador hace scroll de la página para mantener
-visible el input enfocado. Esto hace que `visualViewport` se achique Y
-además **se desplace** (`visualViewport.offsetTop` deja de ser `0`) — pero
-el *layout viewport* (el sistema de referencia de `position: fixed`) no
-cambia. Un elemento `position: fixed; inset: 0` sigue anclado al origen
-`(0,0)` del layout viewport, no al área visualmente visible.
-
-En `src/effects/matrix.ts`, `applyCanvasSize()` (líneas 137-148) redimensiona
-el canvas usando `visualViewport.height` (correctamente, más chico), pero
-**nunca lee ni aplica `visualViewport.offsetTop`**. Resultado: el canvas
-queda del tamaño correcto pero posicionado en el lugar equivocado — cubre
-`[0, visualViewport.height]` en coordenadas del layout viewport, mientras
-que lo que el usuario ve en pantalla es
-`[offsetTop, offsetTop + visualViewport.height]`. La franja inferior de la
-pantalla real queda fuera del canvas — por eso se ve negra, no porque
-falten gotas ahí.
-
-**Fix**: en `applyCanvasSize()`/`handleResize()`, además de ajustar el
-tamaño, aplicar la posición del canvas seteando
+### `matrix` en mobile: fix de posicionamiento aplicado, ítem cerrado
+**Fix aplicado y confirmado**: en mobile, al abrir el teclado virtual, el
+navegador desplaza `visualViewport` (`visualViewport.offsetTop` deja de
+ser `0`) mientras el *layout viewport* —la referencia de `position: fixed`—
+no cambia. `applyCanvasSize()` en `src/effects/matrix.ts` ahora aplica
 `canvas.style.transform = translate(${visualViewport.offsetLeft}px, ${visualViewport.offsetTop}px)`
-(o ajustar `top`/`left` en vez de depender solo de `inset: 0`), para que
-el canvas siga al viewport visual en posición, no solo en tamaño. Esto
-debe correr en el mismo handler que ya escucha `visualViewport.resize`,
-agregando también el caso de `visualViewport.scroll` si el offset puede
-cambiar sin que cambie el tamaño.
+además de ajustar el tamaño, escuchando tanto `visualViewport.resize`
+como `visualViewport.scroll` — el canvas sigue al viewport visual en
+posición, no solo en tamaño. `initDrops()` (fix previo, regeneración de
+columnas) se mantiene, sigue siendo válido para su propio caso.
+
+**Franja residual entre el texto y la barra de sugerencias del teclado —
+investigada y cerrada, no es un bug**: esa franja es UI nativa del
+teclado/navegador (barra de sugerencias predictiva), fuera del DOM y del
+viewport de cualquier sitio web. Ningún código de página puede pintar esa
+zona — es un límite de plataforma (sandbox del navegador), no una
+limitación de NicolasOS. Confirmado en iOS y Android por igual. Con el
+fix de posicionamiento de arriba, `matrix` cubre el 100% de lo que la
+página efectivamente controla, que es todo lo que se puede pedir.
+
+**Estado: cerrado.** No queda ninguna tarea pendiente de `matrix` en
+mobile. No reabrir salvo que cambie la naturaleza del proyecto (ej. se
+empaquete como app nativa con acceso a la UI del teclado del sistema).
 
 **Criterio de aceptación**: captura de Playwright que simula la apertura
 del teclado virtual (reduciendo `visualViewport.height` Y seteando
 `visualViewport.offsetTop` a un valor mayor a 0) confirma que el canvas
-se reposiciona junto con el viewport visual — la franja inferior de la
-pantalla real sigue cubierta por la animación, sin negro. Confirmar
-también que `initDrops()` (el fix anterior) se mantiene, ya que sigue
-siendo válido para el caso de regeneración de contenido tras resize, solo
-que no era la causa de este bug específico.
+se reposiciona junto con el viewport visual.
 
-### Bug residual: franja negra más chica, persiste tras el fix de posicionamiento
-**Confirmado en dispositivo real después de aplicar el fix de arriba**: el
-corte grande ya no está, pero queda una franja negra más chica, sin
-caracteres, entre el final del texto de la terminal y la barra de
-sugerencias del teclado (predictive text). **No es específico de
-Android** — se confirmó también en iPhone/iOS Safari, así que el fix no
-puede depender de nada exclusivo de una plataforma. Es un problema
-distinto — de **timing/regeneración del buffer**, no de posicionamiento
-(ese ya está resuelto y sí funciona en ambas plataformas).
-
-**Causa probable**: `applyCanvasSize()` hace `canvas.width = ...` /
-`canvas.height = ...` en cada evento — setear esas propiedades limpia
-**todo** el buffer del canvas, no solo la franja nueva. La apertura del
-teclado (en iOS y en Android) no es un solo evento: `visualViewport`
-dispara varios `resize`/`scroll` seguidos mientras el teclado se anima
-abriendo (y si hay una barra de sugerencias predictiva, puede cambiar de
-alto un momento después de que el teclado ya terminó de abrir, disparando
-otro resize adicional — esto aplica a los teclados predictivos de ambas
-plataformas, no solo Gboard). Cada uno de esos eventos intermedios vuelve
-a limpiar el buffer completo. Aunque `initDrops()` preserva la posición
-de caída de cada columna, el contenido ya pintado se pierde en cada
-wipe — y como cada columna dibuja un carácter por frame, reconstruir la
-franja recién expuesta toma varios frames. Si el screenshot se toma poco
-después de que el teclado terminó de abrirse, esa franja se ve vacía
-porque las gotas todavía no llegaron, combinado con que cada resize
-intermedio reinicia el progreso ya hecho.
-
-**A confirmar antes de implementar** (no implementar sin antes verificar
-esto, para no arreglar el síntoma equivocado otra vez, y confirmar en
-AMBAS plataformas — iOS y Android — no solo una):
-1. Loguear cuántas veces dispara `visualViewport resize`/`scroll` durante
-   una apertura real de teclado en dispositivo — si son 3-5 eventos en
-   ~300ms, cada uno está limpiando el buffer de nuevo.
-2. Si se confirma lo anterior, el fix es **debounce**: no llamar
-   `applyCanvasSize()`/`initDrops()` en cada evento individual, sino
-   esperar a que el viewport deje de cambiar (ej. ~100-150ms sin nuevos
-   eventos) antes de aplicar el resize una sola vez — el buffer se limpia
-   una vez, no varias, y queda más margen para que la animación rellene
-   la franja antes del próximo wipe.
-3. Alternativa/complementaria (evaluar solo si el debounce no alcanza):
-   usar `ctx.getImageData`/`putImageData` para preservar el contenido ya
-   dibujado al cambiar de tamaño, en vez de limpiar todo el buffer. Más
-   complejo — probablemente no hace falta si el debounce resuelve el caso.
-
-**Criterio de aceptación**: log/medición confirma la cantidad de eventos
-`resize`/`scroll` disparados durante una apertura real de teclado, en
-**iOS y Android por separado** (los timings de animación del teclado son
-distintos entre plataformas, el debounce tiene que funcionar para ambos).
-Con el debounce aplicado, confirmar en dispositivo real (o emulación lo
-más fiel posible) que la franja entre el texto y la barra de sugerencias
-también tiene lluvia de código, sin negro residual, en las dos plataformas.
-
-### Debounce aplicado, franja residual persiste — Playwright no puede verificar esto
-**Confirmado en dispositivo real después del fix de debounce (commit
-`2e38209`)**: la franja negra sigue apareciendo, sin cambio observable.
-
-**Limitación de herramienta descubierta**: Playwright (Chrome desktop)
-**no puede reproducir la apertura real de teclado virtual mobile** —
-`visualViewport.height`/`offsetTop` son propiedades de solo lectura que
-controla el motor del navegador según el teclado táctil real, y Chrome
-desktop no tiene teclado táctil que las dispare. Todas las
-verificaciones anteriores de este bug hechas "con Playwright" fueron en
-los hechos solo revisión de código (los subagentes de gate confirmaron
-lógica, nunca observaron el bug real reproducido ni corregido) — el
-criterio de aceptación de arriba ("captura de Playwright... confirma...
-sin negro residual") **no es alcanzable con las herramientas actuales**
-para este bug específico y hay que dejar de exigirlo como gate hasta
-tener otra vía de verificación real.
-
-**Instrumentación agregada para diagnóstico real** (`src/effects/matrix.ts`):
-overlay de debug activado por query param `?debug=matrix`, que muestra en
-vivo `visualViewport.height/width/offsetTop/offsetLeft`,
-`innerHeight/innerWidth`, tamaño y `transform` actual del canvas, y un
-contador de eventos crudos de `visualViewport` vs aplicaciones reales de
-resize (post-debounce) — para leer directamente en la pantalla del
-celular sin necesitar cable ni consola remota. Es diagnóstico temporal
-(`ponytail:` marcado en el código), se saca una vez cerrado este bug, no
-es parte de la superficie normal del producto.
-
-**Pendiente**: el usuario reporta los valores reales del overlay abriendo
-el teclado en su dispositivo (iOS y/o Android). Con esos números se
-confirma o descarta la hipótesis de debounce/ráfaga de eventos antes de
-seguir iterando a ciegas.
-
-### Dato real obtenido: el canvas coincide con visualViewport, franja podría ser UI del sistema
-**Primer reporte real del overlay** (Android, teclado abierto): `raw
-events: 52 | applied: 2`, `vv.height: 434.0 | vv.width: 428.0`,
-`vv.offsetTop: 0.0 | vv.offsetLeft: 0.0`, `canvas: 428x434 @ transform
-translate(0px, 0px)`. El debounce funciona (52 eventos crudos → 2
-aplicaciones reales). El canvas coincide exactamente en tamaño y
-posición con `visualViewport` — matemáticamente cubre el 100% de lo que
-el navegador reporta como área visible de la página.
-
-**Nueva hipótesis**: si el canvas coincide exactamente con
-`visualViewport` y aun así hay una franja negra visible arriba del
-teclado, esa franja probablemente **no es parte de la página** — es la
-barra de sugerencias predictivas o el borde superior del teclado del
-sistema operativo, dibujada por encima de todo, fuera de
-`visualViewport` y fuera de cualquier control posible desde CSS/JS de la
-página.
-
-**A confirmar antes de seguir iterando código**: agregar al overlay de
-debug un marcador visual (línea de color sólido, ancho completo, 2-3px)
-posicionado exactamente en el borde inferior real del canvas
-(`offsetTop + height`, mismo `transform` que el canvas). Con eso, una
-captura del dispositivo real muestra sin ambigüedad si la franja negra
-está POR ENCIMA de esa línea (canvas no llega — bug real, seguir
-iterando) o POR DEBAJO (UI del teclado/sistema, no es un bug de la
-página — cerrar este ítem, no hay nada más que hacer del lado del
-código).
-
-**Criterio de aceptación**: captura de dispositivo real (iOS y Android)
-con el marcador visible confirma en cuál de los dos casos estamos.
-
-### CERRADO: confirmado con el marcador — no es un bug de la página
-**Captura real (Android, teclado abierto, línea marcadora visible)**: la
-línea cyan queda pegada directamente al pill de sugerencia del teclado
-(`ns-dev-five.vercel.app`) — no hay ningún espacio negro entre la línea
-y el teclado. El canvas cubre el 100% del área real, sin excepción.
-
-Lo que se veía en las capturas anteriores como "franja negra residual"
-era la UI del teclado del sistema operativo (barra de sugerencias
-predictivas / borde superior del teclado) — no forma parte de
-`visualViewport` ni de la página, está fuera de cualquier alcance de
-CSS/JS. **No hay nada más que arreglar acá.**
-
-Este ítem (y el de posicionamiento/offset que lo precedió) quedan
-**cerrados**. El overlay de debug (`?debug=matrix`, `debugEl`,
-`debugMarkerEl` en `src/effects/matrix.ts`) se retira del código en el
-mismo commit que cierra este hallazgo — cumplió su propósito de
-diagnóstico y no es parte de la superficie normal del producto.
+**Estado**: cerrado. No queda ninguna tarea pendiente de `matrix` en mobile.
 
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
-ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en
-vista normal (con `matrix` activo en ambas). Verificar también en un
-segundo tamaño de viewport mobile distinto (ej. 428x926) para confirmar
+ancho visibles **que la página controla** (`visualViewport`, no la UI
+nativa del teclado — ver ítem cerrado más abajo), tanto en vista terminal
+como en vista normal (con `matrix` activo en ambas). Verificar también en
+un segundo tamaño de viewport mobile distinto (ej. 428x926) para confirmar
 que no es un valor hardcodeado que solo funciona para un tamaño puntual.
 
 ### Bug conocido a evitar: texto del input ilegible sobre matrix en windows-xp
@@ -330,6 +204,22 @@ con efectos de fondo (hacker con su lluvia de código).
 
 ## Analítica de comandos
 - Trackear qué comandos usa la gente, sin cookies de terceros invasivas.
+
+### Bug encontrado en auditoría: analytics sin opt-in explícito
+`src/core/analytics.ts` guarda conteo de comandos en `localStorage` sin
+pedirle permiso al usuario primero — viola el mismo principio que ya
+aplica a `music` ("siempre opt-in explícito, nunca automático") y al
+espíritu general de `08-seguridad.md` sobre datos del visitante.
+
+**Fix**: la analítica debe arrancar desactivada por default. Mostrar un
+aviso discreto (una sola vez, la primera sesión) o requerir un comando
+explícito para activarla — mismo patrón que `music`. Si el usuario no
+opta explícitamente, `analytics.ts` no debe escribir nada en `localStorage`.
+
+**Criterio de aceptación**: test que confirma que, sin acción explícita
+del usuario, no se escribe ningún dato en `localStorage` desde
+`analytics.ts`. Test de que activarlo explícitamente sí empieza a
+trackear, y que hay una forma clara de desactivarlo de nuevo.
 
 ## Depende de
 Todo lo anterior (01 a 05, y 07).

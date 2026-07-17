@@ -5,6 +5,10 @@ import { History } from "../../src/core/history";
 
 class FakeAudioContext {
   destination = {};
+  // arranca "suspended" como en mobile real (iOS Safari) hasta que resume()
+  // se llama sincrónicamente dentro del gesto de usuario (specs/06-effects-v2.md,
+  // bug "la música no suena en mobile").
+  state: "suspended" | "running" | "closed" = "suspended";
   createGain() {
     return { gain: { value: 0 }, connect: vi.fn() };
   }
@@ -18,7 +22,10 @@ class FakeAudioContext {
     };
   }
   close = vi.fn();
-  resume = vi.fn().mockResolvedValue(undefined);
+  resume = vi.fn(() => {
+    this.state = "running";
+    return Promise.resolve();
+  });
 }
 
 describe("music effect", () => {
@@ -37,6 +44,31 @@ describe("music effect", () => {
     expect(isMusicPlaying()).toBe(true);
     stopMusic();
     expect(isMusicPlaying()).toBe(false);
+  });
+
+  it("resume() se llama de forma síncrona dentro de startMusic, sin ningún await antes (bug: música no suena en mobile)", () => {
+    // Reproduce el requisito de autoplay de iOS Safari: capturamos la
+    // instancia real de AudioContext que crea startMusic() (no una nueva),
+    // y confirmamos que su estado ya es "running" INMEDIATAMENTE al volver
+    // de startMusic() -- en el mismo tick síncrono, sin esperar ningún
+    // microtask/await. Si el código insertara un await antes de
+    // ctx.resume(), este assert fallaría: el estado seguiría "suspended"
+    // hasta el próximo microtask, que este test no espera.
+    let created: FakeAudioContext | undefined;
+    class SpyAudioContext extends FakeAudioContext {
+      constructor() {
+        super();
+        created = this;
+      }
+    }
+    // @ts-expect-error jsdom no implementa AudioContext
+    globalThis.AudioContext = SpyAudioContext;
+
+    startMusic();
+
+    expect(created).toBeDefined();
+    expect(created!.resume).toHaveBeenCalledTimes(1);
+    expect(created!.state).toBe("running");
   });
 
   it("no rompe el parser ni el historial mientras la música está activa", () => {
