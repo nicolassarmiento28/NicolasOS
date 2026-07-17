@@ -20,12 +20,14 @@ el MVP ya está validado con uso real.
      opacidad del texto cada pocos segundos (efecto CRT viejo), algo que
      linux no tiene en absoluto.
    - **Fondo con lluvia de código ambiental**: una capa de fondo, detrás
-     del panel de terminal, con columnas de caracteres cayendo a opacity
-     muy baja (5-8%) y velocidad lenta — corre todo el tiempo mientras el
-     tema hacker está activo, no es el comando `matrix` (ese sigue siendo
-     el easter egg a pantalla completa). Es ambiental y permanente, y por
-     sí solo ya hace que el tema se sienta estructuralmente distinto, no
-     solo "linux con más brillo".
+     del panel de terminal, con columnas de caracteres cayendo. Probado en
+     el build real con opacity 5-8% y resultó casi invisible — subir a
+     **15-20% de opacity**, y además agregar un `text-shadow`/glow leve a
+     los caracteres de la lluvia para que se lean mejor contra el negro.
+     Sigue siendo sutil (no compite con el texto de la terminal en primer
+     plano), pero tiene que notarse a simple vista sin tener que buscarlo.
+     Corre todo el tiempo mientras el tema hacker está activo, no es el
+     comando `matrix` (ese sigue siendo el easter egg a pantalla completa).
    - Cursor con animación de "respiración" (pulso de glow), no solo blink
      on/off como en los demás temas.
    - Chips con anillo de glow visible en hover (`box-shadow` con blur alto).
@@ -36,42 +38,6 @@ otro, sin leer el nombre del tema, los identifica como temas distintos en
 menos de 2 segundos — no solo "el mismo pero más verde".
 
 Ver distinción base contra `linux` en `03-temas.md`.
-
-### Revisión de diseño-visual (2026-07-16)
-
-Estado de implementación revisado contra `src/themes/themes.ts`,
-`src/themes/ambientRain.ts` y `src/style.css`. **Veredicto: aprobado**,
-los 6 elementos pedidos están cubiertos:
-
-1. Glow doble capa — tokens `GLOW_PX`/`GLOW_PX_2`, tier `"intense"`
-   exclusivo de hacker (`--theme-glow-2`).
-2. Flicker — `data-theme-flicker="1"`, animación `theme-flicker`,
-   gateada por data-attribute (no por nombre de tema), desactivada en
-   `prefers-reduced-motion: reduce`.
-3. Lluvia ambiental — módulo separado (`ambientRain.ts`) del comando
-   `matrix`, canvas propio `z-index: -2`, opacity 0.07 (dentro del rango
-   5-8% pedido), redibuja 1 de cada 4 frames, se auto-desactiva con
-   `prefers-reduced-motion: reduce`.
-4. Cursor "breathe" — `data-cursor-style="breathe"`, animación
-   `cursor-breathe`, distinto del blink de los demás temas.
-5. Chips con anillo de glow en hover — `--theme-chip-hover-glow` (20px
-   en `intense` vs 6-10px en el resto).
-6. Scanlines marcadas — tier `"intense"` (opacity 0.07) por encima de
-   `"visible"` de cyberpunk (0.035).
-
-Mecanismo coherente con el patrón ya establecido para
-linux/cyberpunk/dos: todo pasa por `ThemeTokens` y se aplica vía
-`applyTheme()` con CSS custom properties y data-attributes — no hay
-`if (theme === "hacker")` hardcodeado en CSS ni en JS de UI.
-
-**Nota de proceso (no de diseño)**: el comentario en
-`src/themes/themes.ts` (líneas ~147-149) indica que el tema hacker ya
-está en producción "pese al bloqueo formal del spec", por decisión
-verbal del usuario. Este documento sigue marcado BLOQUEADO como
-gate formal de `orchestrator`; diseño-visual no tiene autoridad para
-levantar ese bloqueo, solo evaluó fidelidad visual del resultado. Si el
-bloqueo se levantó, debe reflejarse explícitamente acá (fecha + quién
-lo autorizó) para que el spec no quede contradictorio.
 
 ## `music`
 - Loop ambiental de fondo, **siempre opt-in explícito**, nunca autoplay.

@@ -247,8 +247,14 @@ body {
   /* ancho ajustado al contenido tipeado (ver main.ts, syncInputWidth) en vez
      de flex:1 — con flex:1 el input ocupa todo el espacio disponible y
      #cursor queda pegado al borde derecho de la fila en vez de fluir junto
-     al texto (bug conocido, specs/10-diseno-visual.md). */
-  width: 1ch;
+     al texto (bug conocido, specs/10-diseno-visual.md).
+     width: auto + field-sizing: content deja que el input se mida contra su
+     propio contenido real en vez de un cálculo en `ch` (que redondea hacia
+     abajo y corta el primer carácter tipeado, bug conocido). syncInputWidth
+     en main.ts queda como fallback en `ch` para navegadores sin
+     field-sizing, con +1 de margen para no repetir el mismo corte. */
+  width: auto;
+  field-sizing: content;
   min-width: 1px;
   flex: none;
   background: transparent;

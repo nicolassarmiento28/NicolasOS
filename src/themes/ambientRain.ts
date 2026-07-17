@@ -48,8 +48,10 @@ export function startAmbientRain(): void {
     // setInterval propio ni bloquear el hilo principal/input del terminal.
     if (frame % 4 === 0) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "rgba(0, 255, 65, 0.07)";
+      ctx.fillStyle = "rgba(0, 255, 65, 0.18)";
       ctx.font = `${FONT_SIZE}px monospace`;
+      ctx.shadowColor = "#00ff41";
+      ctx.shadowBlur = 4;
       for (let i = 0; i < drops.length; i++) {
         const char = CHARS[Math.floor(Math.random() * CHARS.length)];
         ctx.fillText(char, i * FONT_SIZE, drops[i] * FONT_SIZE);

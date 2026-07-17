@@ -50,27 +50,18 @@ del terminal toca el borde de la pantalla sin padding.
   el contenedor — sin esto, los caracteres de arte ASCII se superponen o
   se desalinean entre líneas (bug visto en la vista normal, donde el logo
   se ve roto/ilegible).
-  - **Ajuste documentado (revisado por diseno-visual)**: con la fuente y
-    los caracteres de caja usados en el banner actual, `line-height: 1.1`
-    corta las líneas — `1.2` es el valor mínimo real sin overlap, probado
-    con Playwright (ver `src/style.css`, `.ascii-banner`). Se acepta como
-    excepción documentada al rango sugerido; si se cambia la fuente o el
-    arte ASCII, re-verificar si `1.1` vuelve a ser viable.
 
 **Criterio de aceptación**: captura de Playwright confirma que las líneas
 del ASCII art no se superponen ni se cortan, en terminal y en vista normal.
 
-### Bug conocido a evitar: banner pegado al texto siguiente — RESUELTO
-Faltaba espaciado vertical entre el ASCII art y la línea de texto que viene
-después (ej. "NicolasOS — escribe help..."). Corregido con
-`margin: 0 0 1.2em` en `.ascii-banner` (`src/style.css`), que separa el
-banner del texto siguiente con más de una línea en blanco de margen.
+### Bug conocido a evitar: banner pegado al texto siguiente
+Falta espaciado vertical entre el ASCII art y la línea de texto que viene
+después (ej. "NicolasOS — escribe help..."). Agregar `margin-bottom` al
+contenedor del ASCII art (o `margin-top` a la línea siguiente) — al menos
+una línea en blanco de separación visual, no los dos bloques pegados.
 
 **Criterio de aceptación**: captura de Playwright confirma un espacio
 vertical visible entre el ASCII art y el texto que lo sigue.
-
-**Estado**: revisado por `diseno-visual` por lectura de código
-(`src/style.css`) — aprobado, fiel al criterio.
 
 ## Boot con efecto de escritura (implementa: onboarding-ux)
 - Los mensajes de boot se tipean carácter por carácter (20-30ms por
@@ -97,7 +88,7 @@ levemente menor que el resto — son easter eggs, no acciones primarias.
 - El prompt (`nicolas@os:~$`) lleva un `text-shadow` sutil del mismo color
   de acento (efecto phosphor), configurable por tema.
 
-### Bug conocido a evitar: caret desacoplado del texto — RESUELTO
+### Bug conocido a evitar: caret desacoplado del texto
 El cursor parpadeante (el "caret", el punto de inserción de texto) debe
 fluir junto con lo que el usuario va tipeando — es un elemento `inline-block`
 dentro del mismo contenedor que el prompt y el input, inmediatamente
@@ -105,22 +96,22 @@ después del último carácter escrito. NO debe tener `position: absolute`
 con coordenadas fijas — eso lo deja pegado a un punto fijo (ej. el borde
 izquierdo) en vez de moverse con el texto.
 
-Corregido en `src/style.css` (`#input` pasa de `flex: 1` a `width: 1ch;
-flex: none`) y `src/main.ts` (`syncInputWidth()`, llamada en `input` y tras
-`keydown` de Enter/ArrowUp/ArrowDown), que ajusta el ancho del input al
-largo del texto tipeado (`Nch`) para que `#cursor`, que le sigue en el
-flujo normal, quede siempre inmediatamente después del último carácter en
-vez de pegado al borde derecho del contenedor. No usa `position: absolute`.
-
 **Criterio de aceptación**: test o captura de Playwright que escribe texto
 en el input y confirma que el cursor aparece inmediatamente después del
 último carácter, no en una posición fija.
 
-**Estado**: revisado por `diseno-visual` por lectura de código
-(`src/style.css`, `src/main.ts`) — aprobado, fiel al criterio. Nota no
-bloqueante: el resize de `width` ocurre en saltos de `1ch` por tecla, sin
-transición CSS; con fuente monoespaciada el salto es imperceptible y el
-spec no exige suavizado de ancho, así que no se pide ajuste.
+### Bug conocido a evitar: primer carácter tipeado se ve cortado/deformado
+Al escribir la primera letra en el input, aparece visualmente cortada o
+deformada (no es el cursor, es el carácter en sí). Causa más probable: el
+contenedor que muestra el texto tipeado tiene `width` fijo o `overflow: hidden`
+calculado para el estado vacío, y no se recalcula a tiempo con el primer
+carácter. Usar `width: auto` / `fit-content` en ese contenedor, y confirmar
+que no hay ninguna transformación CSS (`scale`, `rotate`) aplicada
+condicionalmente que solo afecte al primer render.
+
+**Criterio de aceptación**: captura de Playwright que escribe una sola
+letra y confirma que se renderiza completa y sin distorsión, igual que el
+resto del texto tipeado después.
 
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.

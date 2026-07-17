@@ -62,7 +62,20 @@ describe("boot y onboarding-ux", () => {
     const input = document.querySelector<HTMLInputElement>("#input")!;
     input.value = "whoami";
     input.dispatchEvent(new Event("input"));
-    expect(input.style.width).toBe(`${input.value.length}ch`);
+    // +1 de margen (ver main.ts, syncInputWidth): evita que el cálculo en
+    // `ch`, que redondea hacia abajo, corte el último carácter tipeado.
+    expect(input.style.width).toBe(`${input.value.length + 1}ch`);
+  });
+
+  it("el primer carácter tipeado no queda cortado por un width calculado para el estado vacío (specs/10-diseno-visual.md)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "w";
+    input.dispatchEvent(new Event("input"));
+    // el width del fallback en `ch` debe cubrir el carácter con margen, y
+    // field-sizing: content (CSS) es quien realmente evita el corte donde
+    // está soportado.
+    expect(input.style.width).toBe(`${1 + 1}ch`);
   });
 
   it("carga la terminal con el tema 'dos' por defecto, no cyberpunk (specs/03-temas.md)", async () => {

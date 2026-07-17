@@ -138,9 +138,12 @@ output.addEventListener("click", (e) => {
 // el input crece con el texto tipeado (width: Nch, ver style.css) para que
 // #cursor, inmediatamente después en el flujo normal, quede pegado al
 // último carácter en vez de a un punto fijo (bug conocido,
-// specs/10-diseno-visual.md).
+// specs/10-diseno-visual.md). Es fallback: `field-sizing: content` en CSS
+// ya resuelve esto de forma nativa donde está soportado; el +1 de margen
+// evita que este cálculo en `ch` (que redondea hacia abajo) corte el
+// primer carácter tipeado en navegadores sin field-sizing (bug conocido).
 function syncInputWidth(): void {
-  input.style.width = `${Math.max(input.value.length, 1)}ch`;
+  input.style.width = `${Math.max(input.value.length, 1) + 1}ch`;
 }
 
 input.addEventListener("input", syncInputWidth);
