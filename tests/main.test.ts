@@ -35,9 +35,9 @@ describe("boot y onboarding-ux", () => {
     expect(output.textContent).toContain("nicolas@os:~$ whoami");
   });
 
-  it("el botón de vista normal muestra el contenido sin terminal en 1 click", async () => {
+  it("el control □ (maximizar/restaurar) muestra el contenido sin terminal en 1 click", async () => {
     await bootMain();
-    const toggle = document.querySelector<HTMLButtonElement>("#fallback-toggle")!;
+    const toggle = document.querySelector<HTMLButtonElement>("#window .win-maximize")!;
     toggle.click();
     const fallbackWindow = document.querySelector("#fallback-window")!;
     const win = document.querySelector("#window") as HTMLElement;
@@ -48,9 +48,49 @@ describe("boot y onboarding-ux", () => {
     expect(fallbackWindow.textContent).toContain("Contacto");
   });
 
+  it("el control □ de la vista normal vuelve a la terminal", async () => {
+    await bootMain();
+    document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
+    document.querySelector<HTMLButtonElement>("#fallback-window .win-maximize")!.click();
+    const fallbackWindow = document.querySelector("#fallback-window") as HTMLElement;
+    const win = document.querySelector("#window") as HTMLElement;
+    expect(fallbackWindow.hidden).toBe(true);
+    expect(win.hidden).toBe(false);
+  });
+
+  it("el control _ (minimizar) imprime un easter egg sin romper el parser ni el historial", async () => {
+    await bootMain();
+    document.querySelector<HTMLButtonElement>("#window .win-minimize")!.click();
+    const output = document.querySelector("#output")!;
+    expect(output.textContent).toContain("no minimiza nada");
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "whoami";
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(output.textContent).toContain("nicolas@os:~$ whoami");
+  });
+
+  it("el control X (cerrar) imprime un easter egg sin cerrar nada", async () => {
+    await bootMain();
+    document.querySelector<HTMLButtonElement>("#window .win-close")!.click();
+    const output = document.querySelector("#output")!;
+    expect(output.textContent).toContain("no podés cerrarme");
+    const win = document.querySelector("#window") as HTMLElement;
+    expect(win.hidden).toBe(false);
+  });
+
+  it("el tema linux no muestra los controles de ventana (_ □ X)", async () => {
+    await bootMain();
+    const input = document.querySelector<HTMLInputElement>("#input")!;
+    input.value = "theme linux";
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+    expect(document.documentElement.style.getPropertyValue("--theme-window-controls")).toBe(
+      "none",
+    );
+  });
+
   it("cada proyecto en la vista normal muestra un link funcional a su demo y el ASCII banner está presente", async () => {
     await bootMain();
-    document.querySelector<HTMLButtonElement>("#fallback-toggle")!.click();
+    document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
     const fallbackWindow = document.querySelector("#fallback-window")!;
     const links = fallbackWindow.querySelectorAll<HTMLAnchorElement>("a.project-link");
     expect(links.length).toBeGreaterThan(0);

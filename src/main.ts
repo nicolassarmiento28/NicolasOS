@@ -17,7 +17,7 @@ const history = new History();
 applyTheme(DEFAULT_THEME);
 
 // Bug conocido (specs/10-diseno-visual.md "botón de cambio de vista poco
-// visible"): con titlebar en gradiente (cyberpunk), el botón #fallback-toggle
+// visible"): con titlebar en gradiente (cyberpunk), el control .window-control
 // necesita un fondo opaco propio para no perder contraste contra el
 // gradiente (ver regla `.titlebar-gradient` en style.css). Se detecta en
 // runtime leyendo la custom property, no por nombre de tema hardcodeado —
@@ -61,7 +61,11 @@ app.innerHTML = `
         <span class="dot dot-green"></span>
       </div>
       <span class="titlebar-text">nicolas@os: ~</span>
-      <button id="fallback-toggle" type="button">Vista normal</button>
+      <div class="window-controls">
+        <button class="window-control win-minimize" type="button" aria-label="Minimizar">_</button>
+        <button class="window-control win-maximize" type="button" aria-label="Cambiar vista">&#9633;</button>
+        <button class="window-control win-close" type="button" aria-label="Cerrar">X</button>
+      </div>
     </div>
     <div id="terminal">
       <div id="hint">Escribe "help" para empezar.</div>
@@ -81,7 +85,11 @@ app.innerHTML = `
         <span class="dot dot-green"></span>
       </div>
       <span class="titlebar-text">nicolas@os: ~ (vista normal)</span>
-      <button id="fallback-close" type="button">Vista terminal</button>
+      <div class="window-controls">
+        <button class="window-control win-minimize" type="button" aria-label="Minimizar">_</button>
+        <button class="window-control win-maximize" type="button" aria-label="Cambiar vista">&#9633;</button>
+        <button class="window-control win-close" type="button" aria-label="Cerrar">X</button>
+      </div>
     </div>
     <div id="fallback-content"></div>
   </div>
@@ -89,8 +97,6 @@ app.innerHTML = `
 
 const output = document.querySelector<HTMLDivElement>("#output")!;
 const input = document.querySelector<HTMLInputElement>("#input")!;
-const fallbackToggle = document.querySelector<HTMLButtonElement>("#fallback-toggle")!;
-const fallbackClose = document.querySelector<HTMLButtonElement>("#fallback-close")!;
 const fallbackWindow = document.querySelector<HTMLDivElement>("#fallback-window")!;
 const fallbackContent = document.querySelector<HTMLDivElement>("#fallback-content")!;
 const win = document.querySelector<HTMLDivElement>("#window")!;
@@ -188,7 +194,7 @@ input.addEventListener("keydown", (e) => {
 });
 
 app.addEventListener("click", (e) => {
-  if ((e.target as HTMLElement).closest("#fallback-toggle, #fallback-window")) return;
+  if ((e.target as HTMLElement).closest(".window-controls, #fallback-window")) return;
   input.focus();
 });
 input.focus();
@@ -258,5 +264,21 @@ function closeFallback(): void {
   input.focus();
 }
 
-fallbackToggle.addEventListener("click", openFallback);
-fallbackClose.addEventListener("click", closeFallback);
+// controles de ventana estilo Windows (specs/10-diseno-visual.md): mismo
+// trío `_ □ X` en ambas titlebars (terminal y vista normal). `□` reemplaza
+// al viejo botón "Vista normal"/"Vista terminal" — es la única forma de
+// cambiar de vista ahora. `_` y `X` son easter eggs sin acción real, se
+// resuelven con delegación sobre `document` para cubrir los dos titlebars
+// sin repetir listeners por botón. Ocultos en `linux` vía
+// `--theme-window-controls: none` (src/themes/themes.ts), así que en ese
+// tema el trío no existe en absoluto (ni siquiera clickeable).
+document.addEventListener("click", (e) => {
+  const target = e.target as HTMLElement;
+  if (target.closest(".win-maximize")) {
+    win.hidden ? closeFallback() : openFallback();
+  } else if (target.closest(".win-minimize")) {
+    printLine("esto no minimiza nada, pero lindo intento.");
+  } else if (target.closest(".win-close")) {
+    printLine("no podés cerrarme tan fácil.");
+  }
+});

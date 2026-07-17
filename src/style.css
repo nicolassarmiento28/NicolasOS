@@ -18,6 +18,7 @@
   --theme-scanlines-opacity: 0;
   --theme-chip-radius: 0;
   --theme-titlebar-dots: flex;
+  --theme-window-controls: flex;
   --dim: rgba(255, 255, 255, 0.5);
 }
 
@@ -328,17 +329,31 @@ body {
   box-shadow: 0 0 10px var(--dim);
 }
 
-#fallback-toggle,
-#fallback-close {
+/* Controles de ventana estilo Windows (specs/10-diseno-visual.md): `_ □ X`
+   alineados a la derecha, ocultos por completo en linux vía
+   --theme-window-controls (src/themes/themes.ts, showWindowControls). */
+.window-controls {
+  display: var(--theme-window-controls);
+  margin-left: auto;
+  gap: 0.4rem;
+}
+
+.window-control {
   background: transparent;
   border: 1px solid var(--theme-titlebar-text);
   color: var(--theme-titlebar-text);
-  border-radius: 4px;
-  padding: 0.25rem 0.65rem;
+  border-radius: 3px;
+  width: 1.6rem;
+  height: 1.4rem;
+  padding: 0;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  line-height: 1;
   cursor: pointer;
   opacity: 0.85;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: opacity 150ms ease, background 150ms ease;
 }
 
@@ -348,15 +363,15 @@ body {
    algún punto de la franja. `.titlebar-gradient` la setea main.ts sólo
    cuando --theme-titlebar es un gradiente (detectado en runtime, no
    hardcodeado por nombre de tema) — linux/dos, con titlebar sólida, no
-   llevan esta clase y no cambian. */
-html.titlebar-gradient #fallback-toggle,
-html.titlebar-gradient #fallback-close {
+   llevan esta clase y no cambian (linux tampoco muestra estos controles). */
+html.titlebar-gradient .window-control {
   background: rgba(10, 0, 20, 0.75);
 }
 
-#fallback-toggle:hover,
-#fallback-close:hover {
+.window-control:hover {
   opacity: 1;
+  background: var(--theme-titlebar-text);
+  color: var(--theme-titlebar);
 }
 
 #fallback-content {
