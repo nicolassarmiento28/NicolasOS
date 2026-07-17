@@ -4,12 +4,17 @@ import { History } from "./core/history";
 import type { CommandResult } from "./commands/types";
 import { historyCommand } from "./commands/history";
 import { COMMANDS, COMMAND_NAMES } from "./core/registry";
-import { THEMES } from "./themes/themes";
+import { applyTheme, DEFAULT_THEME, THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
 import { Analytics } from "./core/analytics";
 import { profile, projects, skills, contact } from "./data/content";
 
 const history = new History();
+
+// tema por defecto al arrancar (specs/03-temas.md): sin tema elegido en la
+// sesión, el activo debe ser DEFAULT_THEME (dos), no los valores hardcodeados
+// de :root en style.css (esos son solo fallback antes de que corra JS).
+applyTheme(DEFAULT_THEME);
 
 // banner ASCII de "NicolasOS" (specs/10-diseno-visual.md): se muestra de
 // golpe (tipear ASCII art letra por letra se ve raro), antes de los chips

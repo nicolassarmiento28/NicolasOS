@@ -166,7 +166,10 @@ export const THEMES: Record<string, ThemeTokens> = {
   },
 };
 
-export const DEFAULT_THEME = "cyberpunk";
+// Tema activo al cargar la terminal por primera vez, sin tema elegido en la
+// sesión (specs/03-temas.md, sección "Tema por defecto"). `theme <n>` sigue
+// permitiendo cambiarlo con normalidad; esto solo fija el estado inicial.
+export const DEFAULT_THEME = "dos";
 
 let currentTheme = DEFAULT_THEME;
 

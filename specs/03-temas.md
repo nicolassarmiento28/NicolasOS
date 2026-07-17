@@ -30,19 +30,15 @@ tiene glow, no tiene scanlines, chips rectos, y sin puntos de colores en
 el titlebar — visualmente distinguible de hacker sin mirar el nombre del
 tema.
 
-**Estado (revisado por diseno-visual, 2026-07-16)**: RESUELTO en
-`src/themes/themes.ts`. `linux` tiene `glowIntensity: "none"`,
-`scanlinesIntensity: "none"`, `chipRadius: "sharp"`,
-`showTitlebarDots: false` → se traduce en `--theme-glow: 0px`,
-`--theme-scanlines-opacity: 0`, `border-radius: 0` en chips, y
-`display: none` en los 3 puntos de la titlebar. `hacker` quedó con
-`strong`/`visible`/`rounded`/`true` — distinto de linux en los 4 ejes,
-marcado con comentario `ponytail:` indicando que son tokens placeholder
-sin implementación visual nueva, para no romper el bloqueo de
-`06-effects-v2.md`. Pendiente de verificación visual real con Playwright
-(este agente no tiene Bash/Playwright; delegar a `onboarding-ux` o
-`qa-testing` cuando se abra esa fase) para confirmar el resultado
-renderizado, no solo el valor de los tokens.
+## Tema por defecto
+Al cargar la terminal por primera vez (sin tema elegido en la sesión), el
+tema activo debe ser **`dos`**, no cyberpunk ni ningún otro. El usuario
+puede cambiarlo con `theme <n>` como siempre, pero el estado inicial es dos.
+
+**Criterio de aceptación**: test que carga la app desde cero (sin estado
+previo) y confirma que las variables CSS aplicadas son las de `dos`, no
+las de cyberpunk. Captura de Playwright del primer render confirma
+visualmente el tema dos activo.
 
 ## Implementación
 - Cada tema es un objeto de tokens en `src/themes/themes.ts` (bg, texto,

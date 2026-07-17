@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { THEMES } from "../src/themes/themes";
 
 // main.ts corre su bootstrap al importarse (side effects sobre el DOM),
 // por eso cada test resetea el DOM y re-importa el módulo con vi.resetModules.
@@ -62,5 +63,16 @@ describe("boot y onboarding-ux", () => {
     input.value = "whoami";
     input.dispatchEvent(new Event("input"));
     expect(input.style.width).toBe(`${input.value.length}ch`);
+  });
+
+  it("carga la terminal con el tema 'dos' por defecto, no cyberpunk (specs/03-temas.md)", async () => {
+    document.documentElement.removeAttribute("style");
+    await bootMain();
+    const root = document.documentElement;
+    expect(root.style.getPropertyValue("--theme-bg")).toBe(THEMES.dos.bg);
+    expect(root.style.getPropertyValue("--theme-text")).toBe(THEMES.dos.text);
+    expect(root.style.getPropertyValue("--theme-accent")).toBe(THEMES.dos.accent);
+    expect(root.style.getPropertyValue("--theme-bg")).not.toBe(THEMES.cyberpunk.bg);
+    expect(root.style.getPropertyValue("--theme-accent")).not.toBe(THEMES.cyberpunk.accent);
   });
 });

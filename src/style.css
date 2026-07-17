@@ -1,19 +1,22 @@
+/* Fallback antes de que corra JS (applyTheme se llama al boot en main.ts).
+   Debe reflejar el tema por defecto real (dos), no cyberpunk — ver
+   specs/03-temas.md "Tema por defecto". */
 :root {
-  --theme-bg: #0a0014;
-  --theme-text: #f0f0f0;
-  --theme-accent: #ff00ff;
-  --theme-font: "Courier New", monospace;
-  --theme-titlebar: linear-gradient(90deg, #ff00ff, #00ffff);
-  --theme-titlebar-text: #f0f0f0;
+  --theme-bg: #000000;
+  --theme-text: #ffffff;
+  --theme-accent: #ffffff;
+  --theme-font: "Consolas", monospace;
+  --theme-titlebar: #ffffff;
+  --theme-titlebar-text: #000000;
   --theme-crt: 1;
-  --theme-glow: 8px;
+  --theme-glow: 0px;
   /* segunda capa de text-shadow (halo real de 2 capas) y anillo de hover de
      chips — 0px/igual a --theme-glow por default, no-cero solo en temas
      "intense" como hacker (specs/06-effects-v2.md). Ver src/themes/themes.ts. */
   --theme-glow-2: 0px;
-  --theme-chip-hover-glow: 8px;
-  --theme-scanlines-opacity: 0.035;
-  --theme-chip-radius: 999px;
+  --theme-chip-hover-glow: 0px;
+  --theme-scanlines-opacity: 0;
+  --theme-chip-radius: 0;
   --theme-titlebar-dots: flex;
   --dim: rgba(255, 255, 255, 0.5);
 }
