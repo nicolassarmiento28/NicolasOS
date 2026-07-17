@@ -55,11 +55,6 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
   <div id="window" class="window">
     <div class="titlebar">
-      <div class="traffic-lights">
-        <span class="dot dot-red"></span>
-        <span class="dot dot-yellow"></span>
-        <span class="dot dot-green"></span>
-      </div>
       <span class="titlebar-text">nicolas@os: ~</span>
       <div class="window-controls">
         <button class="window-control win-minimize" type="button" aria-label="Minimizar">_</button>
@@ -79,11 +74,6 @@ app.innerHTML = `
   </div>
   <div id="fallback-window" class="window" hidden>
     <div class="titlebar">
-      <div class="traffic-lights">
-        <span class="dot dot-red"></span>
-        <span class="dot dot-yellow"></span>
-        <span class="dot dot-green"></span>
-      </div>
       <span class="titlebar-text">nicolas@os: ~ (vista normal)</span>
       <div class="window-controls">
         <button class="window-control win-minimize" type="button" aria-label="Minimizar">_</button>
@@ -232,6 +222,7 @@ function renderFallbackView(): string {
   const ia = skills.ia.join(", ");
   return `
     <pre class="ascii-banner">${ASCII_BANNER}</pre>
+    <button type="button" class="btn-back-to-terminal">Volver a terminal</button>
     <section class="fallback-section">
       <h1>${profile.name} — ${profile.title}</h1>
       <p>${profile.location}</p>
@@ -277,7 +268,7 @@ function closeFallback(): void {
 // botón.
 document.addEventListener("click", (e) => {
   const target = e.target as HTMLElement;
-  if (target.closest(".win-maximize")) {
+  if (target.closest(".win-maximize") || target.closest(".btn-back-to-terminal")) {
     win.hidden ? closeFallback() : openFallback();
   } else if (target.closest(".win-minimize")) {
     printLine("esto no minimiza nada, pero lindo intento.");

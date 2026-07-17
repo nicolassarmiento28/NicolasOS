@@ -15,18 +15,14 @@ describe("applyTheme", () => {
       expect(root.style.getPropertyValue("--theme-accent")).toBe(tokens.accent);
       expect(root.style.getPropertyValue("--theme-titlebar")).toBe(tokens.titlebar);
       expect(root.style.getPropertyValue("--theme-crt")).toBe(tokens.crt ? "1" : "0");
-      expect(root.style.getPropertyValue("--theme-titlebar-dots")).toBe(
-        tokens.showTitlebarDots ? "flex" : "none",
-      );
     }
   });
 
   it("linux y hacker se distinguen visualmente (no solo tono de verde)", () => {
-    // linux: austero, sin glow/scanlines/dots, chips rectos (specs/03-temas.md)
+    // linux: austero, sin glow/scanlines, chips rectos (specs/03-temas.md)
     expect(THEMES.linux.glowIntensity).toBe("none");
     expect(THEMES.linux.scanlinesIntensity).toBe("none");
     expect(THEMES.linux.chipRadius).toBe("sharp");
-    expect(THEMES.linux.showTitlebarDots).toBe(false);
     expect(THEMES.linux.crt).toBe(false);
     expect(THEMES.linux.flicker).toBe(false);
     expect(THEMES.linux.ambientRain).toBe(false);
@@ -36,7 +32,6 @@ describe("applyTheme", () => {
     // no tiene en absoluto (flicker, cursor "breathe", lluvia ambiental).
     expect(THEMES.hacker.glowIntensity).toBe("intense");
     expect(THEMES.hacker.scanlinesIntensity).toBe("intense");
-    expect(THEMES.hacker.showTitlebarDots).toBe(true);
     expect(THEMES.hacker.flicker).toBe(true);
     expect(THEMES.hacker.ambientRain).toBe(true);
     expect(THEMES.hacker.cursorStyle).toBe("breathe");

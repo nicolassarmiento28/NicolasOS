@@ -58,6 +58,21 @@ describe("boot y onboarding-ux", () => {
     expect(win.hidden).toBe(false);
   });
 
+  it("la vista normal tiene un botón con texto visible que vuelve a la terminal", async () => {
+    await bootMain();
+    document.querySelector<HTMLButtonElement>("#window .win-maximize")!.click();
+    const backBtn = document.querySelector<HTMLButtonElement>(
+      "#fallback-window .btn-back-to-terminal",
+    )!;
+    expect(backBtn).not.toBeNull();
+    expect(backBtn.textContent).toContain("terminal");
+    backBtn.click();
+    const fallbackWindow = document.querySelector("#fallback-window") as HTMLElement;
+    const win = document.querySelector("#window") as HTMLElement;
+    expect(fallbackWindow.hidden).toBe(true);
+    expect(win.hidden).toBe(false);
+  });
+
   it("el control _ (minimizar) imprime un easter egg sin romper el parser ni el historial", async () => {
     await bootMain();
     document.querySelector<HTMLButtonElement>("#window .win-minimize")!.click();

@@ -28,8 +28,6 @@ export interface ThemeTokens {
   scanlinesIntensity: "none" | "subtle" | "visible" | "intense";
   /** Radio de borde de los chips. "sharp" = TTY austera, "rounded" = pill. */
   chipRadius: "sharp" | "rounded";
-  /** Puntos de colores (rojo/amarillo/verde) en la titlebar. false = barra simple sin cromo (TTY real). */
-  showTitlebarDots: boolean;
   /** Parpadeo aleatorio muy leve en la opacidad del texto del terminal (CRT viejo).
    * Elemento que linux NO tiene en absoluto (specs/06-effects-v2.md, tema hacker). */
   flicker: boolean;
@@ -90,7 +88,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     glowIntensity: "strong",
     scanlinesIntensity: "visible",
     chipRadius: "rounded",
-    showTitlebarDots: true,
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
@@ -106,7 +103,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     glowIntensity: "none",
     scanlinesIntensity: "none",
     chipRadius: "sharp",
-    showTitlebarDots: false,
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
@@ -122,7 +118,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     glowIntensity: "none",
     scanlinesIntensity: "none",
     chipRadius: "sharp",
-    showTitlebarDots: true,
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
@@ -139,7 +134,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     glowIntensity: "none",
     scanlinesIntensity: "none",
     chipRadius: "sharp",
-    showTitlebarDots: true,
     flicker: false,
     cursorStyle: "blink",
     ambientRain: false,
@@ -159,7 +153,6 @@ export const THEMES: Record<string, ThemeTokens> = {
     glowIntensity: "intense",
     scanlinesIntensity: "intense",
     chipRadius: "rounded",
-    showTitlebarDots: true,
     flicker: true,
     cursorStyle: "breathe",
     ambientRain: true,
@@ -193,10 +186,6 @@ export function applyTheme(name: string): boolean {
     SCANLINES_OPACITY[tokens.scanlinesIntensity],
   );
   root.style.setProperty("--theme-chip-radius", CHIP_RADIUS[tokens.chipRadius]);
-  root.style.setProperty(
-    "--theme-titlebar-dots",
-    tokens.showTitlebarDots ? "flex" : "none",
-  );
   root.dataset.themeFlicker = tokens.flicker ? "1" : "0";
   root.dataset.cursorStyle = tokens.cursorStyle;
   // lluvia ambiental: capa de fondo permanente mientras el tema la tenga activa,

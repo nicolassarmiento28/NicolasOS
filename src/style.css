@@ -17,7 +17,6 @@
   --theme-chip-hover-glow: 0px;
   --theme-scanlines-opacity: 0;
   --theme-chip-radius: 0;
-  --theme-titlebar-dots: flex;
   --dim: rgba(255, 255, 255, 0.5);
 }
 
@@ -140,30 +139,6 @@ body {
   background: var(--theme-titlebar);
 }
 
-.traffic-lights {
-  display: var(--theme-titlebar-dots);
-  gap: 0.4rem;
-}
-
-.traffic-lights .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dot-red {
-  background: #ff5f56;
-}
-
-.dot-yellow {
-  background: #ffbd2e;
-}
-
-.dot-green {
-  background: #27c93f;
-}
-
 .titlebar-text {
   flex: 1;
   text-align: center;
@@ -240,6 +215,15 @@ body {
 #input-line {
   display: flex;
   gap: 0.5rem;
+  /* fondo propio semi-opaco (pill) para que el texto tipeado siga siendo
+     legible aunque un efecto de fondo (matrix, lluvia de hacker) tape el
+     fondo normal del tema detrás — specs/06-effects-v2.md, bug conocido. */
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.15em 0.5em;
+  border-radius: 0.3em;
+  background: color-mix(in srgb, var(--theme-bg) 88%, transparent);
 }
 
 #input {
@@ -375,6 +359,25 @@ html.titlebar-gradient .window-control {
 #fallback-content {
   padding: 1.75rem;
   line-height: 1.5;
+}
+
+.btn-back-to-terminal {
+  display: block;
+  margin: 0.75rem 0 0;
+  padding: 0.4rem 1rem;
+  background: transparent;
+  color: var(--theme-accent);
+  border: 1px solid var(--theme-accent);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.btn-back-to-terminal:hover {
+  background: var(--theme-accent);
+  color: var(--theme-bg);
 }
 
 .fallback-section {
