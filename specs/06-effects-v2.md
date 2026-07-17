@@ -281,6 +281,24 @@ código).
 **Criterio de aceptación**: captura de dispositivo real (iOS y Android)
 con el marcador visible confirma en cuál de los dos casos estamos.
 
+### CERRADO: confirmado con el marcador — no es un bug de la página
+**Captura real (Android, teclado abierto, línea marcadora visible)**: la
+línea cyan queda pegada directamente al pill de sugerencia del teclado
+(`ns-dev-five.vercel.app`) — no hay ningún espacio negro entre la línea
+y el teclado. El canvas cubre el 100% del área real, sin excepción.
+
+Lo que se veía en las capturas anteriores como "franja negra residual"
+era la UI del teclado del sistema operativo (barra de sugerencias
+predictivas / borde superior del teclado) — no forma parte de
+`visualViewport` ni de la página, está fuera de cualquier alcance de
+CSS/JS. **No hay nada más que arreglar acá.**
+
+Este ítem (y el de posicionamiento/offset que lo precedió) quedan
+**cerrados**. El overlay de debug (`?debug=matrix`, `debugEl`,
+`debugMarkerEl` en `src/effects/matrix.ts`) se retira del código en el
+mismo commit que cierra este hallazgo — cumplió su propósito de
+diagnóstico y no es parte de la superficie normal del producto.
+
 **Criterio de aceptación**: captura de Playwright en viewport mobile (ej.
 390x844) confirma que el canvas de `matrix` cubre el 100% del alto y
 ancho visibles, sin franjas sin cubrir, tanto en vista terminal como en
