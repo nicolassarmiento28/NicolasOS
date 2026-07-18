@@ -9,6 +9,7 @@ import { applyTheme, DEFAULT_THEME, THEMES } from "./themes/themes";
 import { unknownCommandMessage } from "./core/suggest";
 import { Analytics } from "./core/analytics";
 import { resizeMatrix } from "./effects/matrix";
+import { playKeystroke } from "./effects/sound";
 import { profile, projects, skills, contact } from "./data/content";
 
 const history = new History();
@@ -213,6 +214,9 @@ input.addEventListener("keydown", (e) => {
     }
   }
   syncInputWidth();
+  // sonido opt-in por tecla (sound on/off); no-op si está desactivado. El
+  // anti-solapamiento vive en playKeystroke (cancela el oscillator previo).
+  playKeystroke();
 });
 
 app.addEventListener("click", (e) => {

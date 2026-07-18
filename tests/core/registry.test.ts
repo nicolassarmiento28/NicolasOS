@@ -20,6 +20,7 @@ describe("registry", () => {
         "sudo",
         "matrix",
         "music",
+        "sound",
         "stats",
         "analytics",
         "view",

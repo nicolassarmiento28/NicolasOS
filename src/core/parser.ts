@@ -17,6 +17,7 @@ const ALIASES: Map<string, string> = new Map([
   ["historial", "history"],
   ["matriz", "matrix"],
   ["musica", "music"],
+  ["sonido", "sound"],
   ["estadisticas", "stats"],
   ["analitica", "analytics"],
   ["vista", "view"],

@@ -9,7 +9,7 @@ const CATEGORIES: { label: string; cmds: string[]; extra?: boolean }[] = [
   { label: "info", cmds: ["about", "whoami", "skills", "projects"] },
   { label: "contacto", cmds: ["contact", "github", "linkedin", "resume"] },
   { label: "sistema", cmds: ["theme", "clear", "history", "view"] },
-  { label: "extra", cmds: ["sudo", "matrix", "music", "stats", "analytics"], extra: true },
+  { label: "extra", cmds: ["sudo", "matrix", "music", "sound", "stats", "analytics"], extra: true },
 ];
 
 function chip(cmd: string, extra: boolean): string {

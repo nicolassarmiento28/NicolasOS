@@ -14,6 +14,7 @@ import { clearCommand } from "../commands/clear";
 import { sudoCommand } from "../commands/sudo";
 import { matrixCommand } from "../commands/matrix";
 import { musicCommand } from "../commands/music";
+import { soundCommand } from "../commands/sound";
 import { statsCommand } from "../commands/stats";
 import { analyticsCommand } from "../commands/analytics";
 import { viewCommand } from "../commands/view";
@@ -39,6 +40,7 @@ export const COMMANDS: Record<string, (args: string[]) => CommandResult> = {
   sudo: sudoCommand,
   matrix: matrixCommand,
   music: musicCommand,
+  sound: soundCommand,
   stats: statsCommand,
   analytics: analyticsCommand,
   view: viewCommand,
