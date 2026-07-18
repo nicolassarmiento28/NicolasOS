@@ -207,6 +207,56 @@ escribe una única "E" mayúscula como primer carácter y confirma que se
 renderiza completa (con su asta vertical), tanto en mobile como en
 desktop — la "E" es el caso específico que expuso el bug.
 
+## Swatch de color en el listado de `theme` (implementa: themes)
+Cuando el usuario escribe `theme` sin argumento (`specs/11-mejoras-interaccion.md`,
+Feature 2), el listado de temas deja de ser texto plano y cada nombre lleva
+al lado una muestra visual chica de sus colores reales — tomados de
+`ThemeTokens` (`src/themes/themes.ts`): **solo `bg` y `accent` existen como
+tokens de color por tema** (no hay `fg`/`foreground` separado del `bg` para
+este propósito, y `text` es el color de texto del cuerpo, no del swatch).
+
+- **Forma y tamaño**: cuadrado de `14px × 14px` (no círculo — coherente con
+  `chipRadius: "sharp"` que ya usan varios temas; un círculo forzaría una
+  curva ajena a temas austeros como `linux`/`dos`), con `border-radius: 2px`
+  fijo en los cinco temas (una curva mínima solo para que no se vea como un
+  bloque duro de píxel, no relacionado a `chipRadius` del tema).
+- **Colores que muestra**: dividido en dos mitades verticales de 7px cada
+  una — mitad izquierda con `background: <tokens.bg>`, mitad derecha con
+  `background: <tokens.accent>` — para que un usuario distinga temas que
+  comparten `accent` (ej. `linux` y `hacker` comparten fondo negro y verde
+  similar, pero no son el mismo token) tanto por fondo como por acento de
+  un vistazo. Borde de `1px solid <tokens.accent>` alrededor del cuadrado
+  completo (no solo un color plano) para que temas con `bg` oscuro no se
+  fundan contra el fondo del propio listado, que también es oscuro en la
+  mayoría de los temas.
+- **Espaciado**: el swatch precede al nombre del tema, con `gap: 6px` entre
+  swatch y texto (usar `display: inline-flex; align-items: center; gap: 6px`
+  en el contenedor `swatch + nombre`), y `margin-right: 12px` entre cada
+  par swatch+nombre y el siguiente en el listado (mismo `gap` que ya usan
+  los chips de comandos, no un valor nuevo inventado — ver "Micro-interacciones
+  en chips" arriba para la referencia de espaciado de chips existente).
+- **Accesibilidad**: el swatch en sí es un elemento decorativo (`aria-hidden="true"`)
+  si el nombre del tema ya es texto visible adyacente — pero como además debe
+  ser localizable por lectores de pantalla como "muestra de color", lleva un
+  `aria-label` con el texto exacto **`"Swatch de color del tema {nombre}"`**
+  (ej. `"Swatch de color del tema cyberpunk"`), y en ese caso el swatch usa
+  `role="img"` en vez de `aria-hidden`, para que el `aria-label` se anuncie.
+  No usar `title` como único mecanismo (no es accesible en touch/mobile).
+- **Implementación de salida**: dado que `CommandResult.output` hoy es texto
+  plano (`src/commands/types.ts`), este comando pasa a usar `html: true` con
+  markup de confianza (los nombres de tema vienen de `THEME_NAMES`, nunca de
+  input crudo del usuario, así que no hay riesgo de XSS al interpolarlos) —
+  mismo patrón ya usado en otros comandos que devuelven `html: true` en
+  `CommandResult`.
+
+**Criterio de aceptación**: captura de Playwright del listado de `theme` sin
+argumento confirma que cada uno de los cinco temas (cyberpunk, linux, dos,
+windows-xp, hacker) muestra un swatch de `14×14px` visualmente distinto de
+los demás (comparación de color de fondo del swatch, no solo del texto), y
+que cada swatch tiene un elemento con `role="img"` y `aria-label` exacto
+`"Swatch de color del tema {nombre}"` presente en el DOM (verificable sin
+necesidad de captura, vía `getByRole('img', { name: ... })` de Playwright).
+
 ## Efectos CRT (implementa: themes, como parte de los tokens de cada tema)
 - Overlay de scanlines: líneas horizontales muy sutiles, opacity ~0.02-0.03.
 - Viñeta: oscurecimiento leve en los bordes del panel.
@@ -263,3 +313,4 @@ scroll hasta el final de la página (ej. cerca del ASCII banner, al principio).
 **Criterio de aceptación**: cada proyecto en la vista normal muestra un
 link funcional a su demo (no solo el stack tecnológico), y el ASCII banner
 está presente en esta vista igual que en el boot de terminal.
+</content>

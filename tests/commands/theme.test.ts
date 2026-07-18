@@ -16,6 +16,14 @@ describe("themeCommand", () => {
     expect(result.output).toContain("hacker");
   });
 
+  it("theme sin argumentos incluye un swatch accesible por tema y marca html:true", () => {
+    const result = themeCommand([]);
+    expect(result.html).toBe(true);
+    for (const name of ["cyberpunk", "linux", "dos", "windows-xp", "hacker"]) {
+      expect(result.output).toContain(`aria-label="Swatch de color del tema ${name}"`);
+    }
+  });
+
   it("theme windows-xp aplica las variables CSS del tema", () => {
     const result = themeCommand(["windows-xp"]);
     expect(result.output).toContain("windows-xp");
