@@ -11,6 +11,7 @@ import { Analytics } from "./core/analytics";
 import { resizeMatrix } from "./effects/matrix";
 import { playKeystroke } from "./effects/sound";
 import { profile, projects, skills, contact } from "./data/content";
+import { runBootSequence } from "./core/boot";
 
 const history = new History();
 
@@ -56,6 +57,7 @@ const ASCII_BANNER = `
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML = `
+  <div id="boot-overlay" class="boot-overlay"></div>
   <div id="window" class="window">
     <div class="titlebar">
       <span class="titlebar-text">nicolas@os: ~</span>
@@ -227,9 +229,28 @@ input.focus();
 
 // boot: se auto-ejecuta "help" sin esperar interacción (criterio de
 // aceptación de 01-onboarding-ux.md: la lista de comandos ya es visible al cargar).
+// Esto NO se gatea detrás del boot log de arriba (specs/11-mejoras-interaccion.md
+// #4): el boot log es un overlay que corre EN PARALELO, tapando la pantalla
+// hasta que termina o se salta — el contenido final (banner, hint, chips) ya
+// está armado por debajo desde el primer frame, sin esperar nada.
 printLine(ASCII_BANNER, "ascii-banner");
 typeLine('NicolasOS — escribe "help" para ver los comandos disponibles.', "boot-text");
 handleSubmit("help", false);
+
+// boot log estilo BIOS/Linux (specs/11-mejoras-interaccion.md #4): overlay
+// a pantalla completa que tapa el resto hasta terminar de tipear sus líneas
+// (~2.1s, ver bootDurationMs()) o hasta que el usuario lo salte con
+// cualquier tecla o click — ahí desaparece de inmediato y sin residuos.
+const bootOverlay = document.querySelector<HTMLDivElement>("#boot-overlay")!;
+function finishBoot(): void {
+  bootOverlay.remove();
+  document.removeEventListener("keydown", skipBoot, true);
+  document.removeEventListener("click", skipBoot, true);
+}
+const skipBoot = () => finishBoot();
+runBootSequence(bootOverlay, finishBoot);
+document.addEventListener("keydown", skipBoot, true);
+document.addEventListener("click", skipBoot, true);
 
 // vista fallback no técnica: mismo contenido (about, proyectos, skills,
 // contacto) sin terminal, a 1 click desde cualquier estado. Mismo cromo de

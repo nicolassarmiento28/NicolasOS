@@ -259,6 +259,24 @@ describe("boot y onboarding-ux", () => {
     expect(input.value).toBe('projects');
   });
 
+  it("el boot overlay se muestra al cargar y desaparece de inmediato al presionar cualquier tecla, sin dejar residuos (specs/11-mejoras-interaccion.md)", async () => {
+    await bootMain();
+    expect(document.querySelector("#boot-overlay")).not.toBeNull();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    expect(document.querySelector("#boot-overlay")).toBeNull();
+    // el contenido final (banner, hint, chips) ya estaba presente desde el
+    // primer frame, sin depender de que el boot log termine o se salte.
+    const output = document.querySelector("#output")!;
+    expect(output.textContent).toContain("projects");
+  });
+
+  it("el boot overlay también se saltea con un click en cualquier parte de la página", async () => {
+    await bootMain();
+    expect(document.querySelector("#boot-overlay")).not.toBeNull();
+    document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(document.querySelector("#boot-overlay")).toBeNull();
+  });
+
   it('ArrowLeft/ArrowRight no interceptan el historial (comportamiento nativo)', async () => {
     await bootMain();
     const input = document.querySelector<HTMLInputElement>('#input')!;

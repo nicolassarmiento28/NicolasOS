@@ -120,6 +120,23 @@ body {
    #window (terminal) y #fallback-window (vista normal), mismo lenguaje visual.
    Pantalla completa, sin panel flotante: la terminal ES la página, no una
    ventana sobre un fondo (revert explícito del panel centrado anterior). */
+/* boot log estilo BIOS/Linux (specs/11-mejoras-interaccion.md #4): tapa toda
+   la pantalla hasta terminar o hasta que se salte con cualquier tecla/click. */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  font-family: inherit;
+  padding: 1.75rem;
+  white-space: pre-wrap;
+}
+
+.boot-log-line {
+  opacity: 0.85;
+}
+
 .window {
   position: relative;
   width: 100%;
