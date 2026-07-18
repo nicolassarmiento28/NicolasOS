@@ -22,6 +22,9 @@ const ALIASES: Map<string, string> = new Map([
   ["vista", "view"],
 ]);
 
+// nombres de alias ES, expuestos para autocompletado (ver src/core/autocomplete.ts)
+export const ALIAS_NAMES = [...ALIASES.keys()];
+
 /** Convierte una línea de input en { cmd, args }. Tolera mayúsculas, espacios extra y alias ES. */
 export function parseInput(input: string): ParsedCommand {
   const tokens = input.trim().split(/\s+/).filter(Boolean);

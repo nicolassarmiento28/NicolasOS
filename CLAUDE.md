@@ -23,6 +23,7 @@ y el spec numerado del dominio correspondiente a la tarea.
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal
 - `10-diseno-visual.md` — dirección de arte transversal a temas y onboarding-ux
+- `11-mejoras-interaccion.md` — autocompletado con Tab, preview de temas, sonidos de teclado, boot extendido
 
 ## Subagentes disponibles (.claude/agents/)
 - `orchestrator` — punto de entrada para avanzar sin especificar tarea puntual; decide orden y hace cumplir los gates

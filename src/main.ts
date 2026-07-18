@@ -1,5 +1,6 @@
 import "./style.css";
-import { parseInput } from "./core/parser";
+import { parseInput, ALIAS_NAMES } from "./core/parser";
+import { autocompleteCommand } from "./core/autocomplete";
 import { History } from "./core/history";
 import type { CommandResult } from "./commands/types";
 import { historyCommand } from "./commands/history";
@@ -198,6 +199,18 @@ input.addEventListener("keydown", (e) => {
   } else if (e.key === "ArrowDown") {
     e.preventDefault();
     input.value = history.down();
+  } else if (e.key === "Tab") {
+    e.preventDefault();
+    const { match, options } = autocompleteCommand(input.value, [
+      ...COMMAND_NAMES,
+      ...ALIAS_NAMES,
+    ]);
+    if (match) {
+      input.value = match;
+    } else if (options.length > 1) {
+      printLine(`nicolas@os:~$ ${input.value}`, "echo");
+      printLine(options.join("  "));
+    }
   }
   syncInputWidth();
 });

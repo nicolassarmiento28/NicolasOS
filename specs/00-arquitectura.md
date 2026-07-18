@@ -20,7 +20,7 @@ src/
   commands/     un módulo por comando
   themes/       tokens de color/tipografía por tema
   data/         contenido real: proyectos, skills, experiencia, contacto
-  effects/      matrix.ts, music.ts (fuera de alcance hasta 06-effects-v2.md)
+  effects/      matrix.ts, music.ts (implementados, ver 06-effects-v2.md)
 tests/          un test por módulo de src/
 specs/          este archivo y los demás specs numerados por dominio
 .claude/agents/ subagentes de Claude Code, uno por departamento
@@ -33,10 +33,11 @@ CLAUDE.md       contexto corto que se carga en cada sesión
 - `03-temas.md` — sistema de temas y tokens
 - `04-contenido.md` — datos reales del portafolio
 - `05-seo-fallback.md` — SEO, OG tags, contenido en el DOM
-- `06-effects-v2.md` — matrix, music, temas extra (bloqueado hasta cerrar el resto)
+- `06-effects-v2.md` — matrix, music, temas extra (completado)
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal a todo
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal a todo
 - `10-diseno-visual.md` — dirección de arte transversal a temas y onboarding-ux
+- `11-mejoras-interaccion.md` — autocompletado, preview de temas, sonidos, boot extendido
 
 ## Tabla dominio → agente dueño
 Antes de asignar cualquier tarea, confirmar acá el dueño — evita que un
@@ -49,10 +50,11 @@ subagente reciba trabajo fuera de su `alcance` declarado.
 | 03-temas.md | themes |
 | 04-contenido.md | content |
 | 05-seo-fallback.md | onboarding-ux (misma superficie de contenido que la vista fallback) |
-| 06-effects-v2.md | *(sin agente creado aún — bloqueado, no es urgente)* |
+| 06-effects-v2.md | themes / onboarding-ux (completado, ver detalle en el spec) |
 | 07-qa-testing.md | qa-testing (transversal) |
 | 08-seguridad.md | seguridad (transversal) |
 | 10-diseno-visual.md | diseno-visual (define y revisa, no implementa — themes y onboarding-ux ejecutan) |
+| 11-mejoras-interaccion.md | core-engine (autocompletado), themes (preview de temas, sonidos), onboarding-ux (boot extendido) |
 | build/deploy | devops |
 
 Si `orchestrator` (o cualquier agente) no encuentra dueño claro para una
@@ -70,7 +72,7 @@ cualquiera "por descarte" — no improvisar un dueño.
 ## Orden de dependencias entre dominios
 ```
 02-comandos-core ──┬──> 03-temas ─────────┐
-                    ├──> 04-contenido      ├──> 01-onboarding-ux ──> 06-effects-v2
+                    ├──> 04-contenido      ├──> 01-onboarding-ux ──> 06-effects-v2 (completado)
                     └──> (tests base)     ─┘
                               │
                        07-qa-testing (transversal, revisa todo)
@@ -78,4 +80,3 @@ cualquiera "por descarte" — no improvisar un dueño.
 
 ## No tocar
 - Config/deploy de Vercel — lo maneja el usuario.
-- `src/effects/` hasta que 06-effects-v2.md esté habilitado explícitamente.
