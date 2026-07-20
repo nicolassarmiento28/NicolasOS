@@ -1,5 +1,11 @@
 # 11-mejoras-interaccion.md
 
+> **Implementado, PENDIENTE de auditoría formal.** `npm test` y
+> `npm run build` pasan, pero nadie corrió `qa-testing`/`seguridad`
+> verificando cada criterio de aceptación uno por uno — mismo estado en
+> el que estaba `06-effects-v2.md` antes de encontrarle 2 bloqueantes
+> reales. No asumir que está "completado" hasta que eso pase.
+
 ## Objetivo
 Nueva ronda de features, posterior al cierre auditado de 01-08 y
 06-effects-v2. No reabre esos specs — los referencia cuando corresponde,

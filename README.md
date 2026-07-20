@@ -7,6 +7,13 @@ contenido: proyectos, skills, experiencia y contacto.
 
 🔗 **Demo:** [ns-dev-five.vercel.app](https://ns-dev-five.vercel.app)
 
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)
+
+![Demo de NicolasOS](./docs/screenshot.png)
+
 ---
 
 ## Índice
@@ -66,13 +73,17 @@ organiza por dominios con subagentes especializados de Claude Code (ver
 | `clear` | `limpiar` | sistema | Limpia la pantalla |
 | `history` | `historial` | sistema | Comandos usados en la sesión |
 | `sudo` | — | extra | Easter egg |
-| `matrix` | — | extra | Animación de lluvia de código a pantalla completa |
-| `music` | — | extra | Loop ambiental de audio (opt-in, nunca autoplay) |
-| `stats` | — | extra | Estadísticas de uso/sesión |
+| `matrix` | `matriz` | extra | Animación de lluvia de código a pantalla completa |
+| `music` | `musica` | extra | Loop ambiental de audio (opt-in, nunca autoplay) |
+| `sound on` / `sound off` | `sonido` | extra | Sonido de tecleo (opt-in, arranca desactivado) |
+| `stats` | `estadisticas` | extra | Estadísticas de uso/sesión |
+| `analytics on` / `analytics off` | `analitica` | extra | Analítica local de uso (opt-in, sin red, sin cookies) |
 
 Si escribís un comando que no existe, el sistema sugiere el más parecido
-("¿quisiste decir `projects`?") en vez de solo tirar error. También hay
-navegación de historial con las flechas ↑/↓, igual que una terminal real.
+("¿quisiste decir `projects`?") en vez de solo tirar error. Hay navegación
+de historial con las flechas ↑/↓, y autocompletado con `Tab`: si el
+prefijo matchea un solo comando lo completa (`pro` + Tab → `projects`), si
+matchea varios lista las opciones en vez de completar a ciegas.
 
 ## Temas
 
@@ -86,7 +97,9 @@ navegación de historial con las flechas ↑/↓, igual que una terminal real.
 
 Todos los temas comparten la misma barra de título con controles estilo
 Windows (`_ □ X`) — minimizar y cerrar son easter eggs sin acción real,
-`□` alterna entre vista terminal y vista normal.
+`□` alterna entre vista terminal y vista normal. El comando `theme` sin
+argumento muestra, además de la lista, un swatch de color por tema (con
+texto alternativo para lectores de pantalla).
 
 ## Vista normal (modo no técnico)
 
@@ -96,6 +109,11 @@ tema activo, mismo ASCII banner — pero en formato de página convencional,
 con un botón explícito **"Volver a la terminal"**. Todo el contenido vive
 en el DOM desde la carga inicial (no solo generado por JS en runtime), con
 meta tags Open Graph para que comparta bien en LinkedIn/WhatsApp/Twitter.
+
+Al cargar el sitio corre primero un boot log corto estilo BIOS/Linux
+(`Cargando módulos... OK`, etc.), antes del ASCII banner y el hint de
+ayuda — dura 1.5-2.5s y cualquier tecla o click lo saltea directo al
+estado final.
 
 ---
 
@@ -115,7 +133,7 @@ src/
   commands/     un módulo por comando (mismo contrato de entrada/salida)
   themes/       tokens de color/tipografía/efectos por tema
   data/         contenido real: proyectos, skills, experiencia, contacto
-  effects/      matrix.ts, music.ts
+  effects/      matrix.ts, music.ts, sound.ts
 tests/          un test por módulo de src/
 specs/          especificación completa del proyecto, por dominio
 .claude/
@@ -145,6 +163,7 @@ de verdad del proyecto, dividida por dominio:
 | `07-qa-testing.md` | Estándar de cobertura de tests, transversal |
 | `08-seguridad.md` | XSS, links externos, dependencias, transversal |
 | `10-diseno-visual.md` | Dirección de arte transversal a temas y onboarding-ux |
+| `11-mejoras-interaccion.md` | Autocompletado con Tab, preview de temas, sonidos de teclado, boot extendido |
 
 **Flujo por tarea:** se toma una tarea del spec de su dominio → se delega
 al subagente dueño → se implementa → `qa-testing` valida cobertura de
@@ -224,10 +243,10 @@ La skill `deploy-to-vercel` corre el checklist de pre-deploy (build, tests,
 
 ## Estado del proyecto
 
-Completo. Los dominios `01` a `08` (MVP) y `06-effects-v2` (temas
-`windows-xp`/`hacker`, `music`, `matrix`) fueron auditados con evidencia
-real — `qa-testing` y `seguridad` corriendo cada criterio de aceptación
-uno por uno, no una revisión visual. La auditoría encontró y corrigió:
+Los dominios `01` a `08` (MVP) y `06-effects-v2` (temas `windows-xp`/
+`hacker`, `music`, `matrix`) fueron auditados con evidencia real —
+`qa-testing` y `seguridad` corriendo cada criterio de aceptación uno por
+uno, no una revisión visual. La auditoría encontró y corrigió:
 
 - Bugs de mobile: posicionamiento del canvas de `matrix` con teclado
   virtual, contraste de labels en `windows-xp`, primer carácter cortado
@@ -238,7 +257,16 @@ uno por uno, no una revisión visual. La auditoría encontró y corrigió:
 - El comando `experience`/`experiencia` se confirmó descartado a
   propósito (no es un gap) y se sacó también del modelo de datos.
 
-No queda ningún ítem pendiente ni bloqueante conocido.
+`11-mejoras-interaccion.md` (autocompletado con Tab, swatch de temas,
+sonido de tecleo opt-in, boot BIOS-style) ya está implementado — los 4
+criterios de aceptación del spec tienen código y tests correspondientes.
+Al día de este README, `npm test` corre 182 tests en verde (38 archivos)
+y `npm run build` pasa sin errores; no se verificó con el mismo rigor
+punto por punto de `qa-testing`/`seguridad` que el MVP y `06-effects-v2`,
+así que tratarlo como recién implementado hasta esa auditoría formal.
+
+No queda ningún ítem pendiente ni bloqueante conocido fuera de esa
+auditoría pendiente de `11-mejoras-interaccion.md`.
 
 ---
 
