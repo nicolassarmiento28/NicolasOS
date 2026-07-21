@@ -1,11 +1,13 @@
 # 11-mejoras-interaccion.md
 
-> **AUDITADO (2da ronda) — 3/4 criterios PASAN, 1 bloqueante real encontrado.**
-> `qa-testing` y `seguridad` verificaron cada criterio uno por uno.
-> Resultado:
-> - **Autocompletado con Tab: PASA** (corregido tras la 1ra ronda —
->   `tests/core/autocomplete.test.ts` cubre match único y prefijo
->   ambiguo; seguridad confirma que no roba foco del resto de la página).
+> **COMPLETADO — 4/4 criterios PASAN, auditados por `qa-testing` y
+> `seguridad` criterio por criterio, mismo rigor que 01-08 y
+> `06-effects-v2`.**
+> Resultado final:
+> - **Autocompletado con Tab: PASA** (corregido en la 1ra ronda de
+>   auditoría — `tests/core/autocomplete.test.ts` cubre match único y
+>   prefijo ambiguo; seguridad confirmó que no roba foco del resto de la
+>   página).
 > - **Preview de `theme`: PASA**, con un hueco menor no bloqueante — no
 >   hay verificación automatizada de que los 5 colores sean
 >   *visualmente* distinguibles entre sí (requeriría captura/inspección
@@ -13,21 +15,18 @@
 >   `aria-label` específico por tema sí está testeado.
 > - **`sound on/off`: PASA** — arranca desactivado, anti-solapamiento
 >   real, sin persistencia indebida, sin URLs remotas.
-> - **Boot extendido: NO PASA — bloqueante real, distinto al de la 1ra
->   ronda.** `bootDurationMs()` y `skip()` están bien testeados en
->   aislamiento, pero en `src/main.ts:250-251`, `skipBoot` no usa el
->   cancelador real que devuelve `runBootSequence` — llama a
->   `finishBoot()` directamente. Resultado: al saltar el boot, los
->   `setTimeout` de tipeo siguen corriendo en background sobre un `<div>`
->   ya desmontado, y `onComplete`/`finishBoot` se puede disparar una
->   segunda vez cuando esos timers residuales terminan solos. El test
->   anterior no lo detectó porque solo probaba `skip()` aislado, no el
->   wiring real de `main.ts`.
-> - `npm audit` no se corrió en esta pasada — pendiente antes de cerrar
->   la fase.
+> - **Boot extendido: PASA** (corregido en la 2da ronda de auditoría —
+>   bug de timer huérfano al saltar el boot, ver sección de abajo).
+>   `skipBoot` ahora usa el cancelador real que devuelve
+>   `runBootSequence` en vez de llamar `finishBoot()` por su cuenta.
+>   Se agregó test de integración en `tests/main.test.ts` que ejerce el
+>   wiring real de `main.ts` (evento `keydown` real contra `document`,
+>   `vi.getTimerCount() === 0` tras el skip) — verificado que ese test
+>   falla si se reintroduce el bug original.
+> - `npm audit`: **0 vulnerabilidades**.
 >
-> **No se marca "completado" hasta que el bug de boot se corrija, se
-> corra `npm audit`, y vuelva a pasar por los mismos gates.**
+> `npm test`: 183 tests en verde (38 archivos). `npm run build` pasa sin
+> errores.
 
 ## Objetivo
 Nueva ronda de features, posterior al cierre auditado de 01-08 y

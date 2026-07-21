@@ -163,7 +163,7 @@ de verdad del proyecto, dividida por dominio:
 | `07-qa-testing.md` | Estándar de cobertura de tests, transversal |
 | `08-seguridad.md` | XSS, links externos, dependencias, transversal |
 | `10-diseno-visual.md` | Dirección de arte transversal a temas y onboarding-ux |
-| `11-mejoras-interaccion.md` | Autocompletado con Tab, preview de temas, sonidos de teclado, boot extendido |
+| `11-mejoras-interaccion.md` | Autocompletado con Tab, preview de temas, sonidos de teclado, boot extendido — completado |
 
 **Flujo por tarea:** se toma una tarea del spec de su dominio → se delega
 al subagente dueño → se implementa → `qa-testing` valida cobertura de
@@ -258,15 +258,25 @@ uno, no una revisión visual. La auditoría encontró y corrigió:
   propósito (no es un gap) y se sacó también del modelo de datos.
 
 `11-mejoras-interaccion.md` (autocompletado con Tab, swatch de temas,
-sonido de tecleo opt-in, boot BIOS-style) ya está implementado — los 4
-criterios de aceptación del spec tienen código y tests correspondientes.
-Al día de este README, `npm test` corre 182 tests en verde (38 archivos)
-y `npm run build` pasa sin errores; no se verificó con el mismo rigor
-punto por punto de `qa-testing`/`seguridad` que el MVP y `06-effects-v2`,
-así que tratarlo como recién implementado hasta esa auditoría formal.
+sonido de tecleo opt-in, boot BIOS-style) fue auditado con el mismo rigor
+que el MVP y `06-effects-v2` — `qa-testing` y `seguridad` corriendo cada
+uno de los 4 criterios de aceptación uno por uno, en dos rondas. La
+auditoría encontró y corrigió:
 
-No queda ningún ítem pendiente ni bloqueante conocido fuera de esa
-auditoría pendiente de `11-mejoras-interaccion.md`.
+- 1ra ronda: el handler de `Tab` no distinguía match único de prefijo
+  ambiguo correctamente.
+- 2da ronda: `skipBoot` no usaba el cancelador real de `runBootSequence`,
+  dejando timers de tipeo huérfanos corriendo sobre el overlay ya
+  desmontado tras saltar el boot.
+
+Los 4 criterios pasan hoy con evidencia real de test. Único hueco no
+bloqueante que queda: no hay verificación automatizada (captura
+Playwright) de que los 5 colores de los swatches de `theme` sean
+visualmente distinguibles entre sí — el `aria-label` por tema sí está
+testeado. `npm test` corre 183 tests en verde (38 archivos), `npm run
+build` pasa sin errores, y `npm audit` no encontró vulnerabilidades.
+
+No queda ningún ítem pendiente ni bloqueante conocido.
 
 ---
 
