@@ -247,8 +247,8 @@ function finishBoot(): void {
   document.removeEventListener("keydown", skipBoot, true);
   document.removeEventListener("click", skipBoot, true);
 }
-const skipBoot = () => finishBoot();
-runBootSequence(bootOverlay, finishBoot);
+const cancelBoot = runBootSequence(bootOverlay, finishBoot);
+const skipBoot = () => cancelBoot();
 document.addEventListener("keydown", skipBoot, true);
 document.addEventListener("click", skipBoot, true);
 

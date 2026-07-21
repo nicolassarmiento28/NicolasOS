@@ -1,10 +1,33 @@
 # 11-mejoras-interaccion.md
 
-> **Implementado, PENDIENTE de auditoría formal.** `npm test` y
-> `npm run build` pasan, pero nadie corrió `qa-testing`/`seguridad`
-> verificando cada criterio de aceptación uno por uno — mismo estado en
-> el que estaba `06-effects-v2.md` antes de encontrarle 2 bloqueantes
-> reales. No asumir que está "completado" hasta que eso pase.
+> **AUDITADO (2da ronda) — 3/4 criterios PASAN, 1 bloqueante real encontrado.**
+> `qa-testing` y `seguridad` verificaron cada criterio uno por uno.
+> Resultado:
+> - **Autocompletado con Tab: PASA** (corregido tras la 1ra ronda —
+>   `tests/core/autocomplete.test.ts` cubre match único y prefijo
+>   ambiguo; seguridad confirma que no roba foco del resto de la página).
+> - **Preview de `theme`: PASA**, con un hueco menor no bloqueante — no
+>   hay verificación automatizada de que los 5 colores sean
+>   *visualmente* distinguibles entre sí (requeriría captura/inspección
+>   de píxeles vía Playwright, no existe en el repo todavía). El
+>   `aria-label` específico por tema sí está testeado.
+> - **`sound on/off`: PASA** — arranca desactivado, anti-solapamiento
+>   real, sin persistencia indebida, sin URLs remotas.
+> - **Boot extendido: NO PASA — bloqueante real, distinto al de la 1ra
+>   ronda.** `bootDurationMs()` y `skip()` están bien testeados en
+>   aislamiento, pero en `src/main.ts:250-251`, `skipBoot` no usa el
+>   cancelador real que devuelve `runBootSequence` — llama a
+>   `finishBoot()` directamente. Resultado: al saltar el boot, los
+>   `setTimeout` de tipeo siguen corriendo en background sobre un `<div>`
+>   ya desmontado, y `onComplete`/`finishBoot` se puede disparar una
+>   segunda vez cuando esos timers residuales terminan solos. El test
+>   anterior no lo detectó porque solo probaba `skip()` aislado, no el
+>   wiring real de `main.ts`.
+> - `npm audit` no se corrió en esta pasada — pendiente antes de cerrar
+>   la fase.
+>
+> **No se marca "completado" hasta que el bug de boot se corrija, se
+> corra `npm audit`, y vuelva a pasar por los mismos gates.**
 
 ## Objetivo
 Nueva ronda de features, posterior al cierre auditado de 01-08 y
@@ -20,6 +43,14 @@ pero vive acá como su propio dominio con su propio criterio de cierre.
   patrón que el autocompletado de bash.
 - No interfiere con la navegación normal del input (no debe robarle el
   foco al teclado tab-navegable del resto de la página).
+
+### Bug corregido y verificado (2da ronda de auditoría)
+~~En `src/main.ts:205-206`, el handler llamaba `e.preventDefault()` para
+cualquier Tab presionado~~ — **corregido**: `tests/core/autocomplete.test.ts`
+confirma match único (`pro` → `projects`) y prefijo ambiguo (lista sin
+autocompletar a ciegas). Seguridad confirmó que la función es pura
+(compara contra listas internas fijas) y que no roba foco del resto de
+la página.
 
 **Criterio de aceptación**: test que confirma que `pro` + Tab completa a
 `projects` cuando es la única coincidencia. Test de que un prefijo
@@ -69,6 +100,24 @@ escribir rápido no genera solapamiento audible perceptible.
 **Criterio de aceptación**: test de que el boot log completo (sin saltar)
 no supera ~2.5 segundos. Test de que presionar cualquier tecla o hacer
 click durante el boot lo salta inmediatamente al estado final.
+
+### Bug encontrado en auditoría (2da ronda): timer huérfano al saltar el boot
+`bootDurationMs()` y `skip()` están bien testeados **en aislamiento**,
+pero el wiring real en `src/main.ts:250-251` no los usa correctamente:
+`skipBoot` no captura el cancelador que devuelve `runBootSequence` —
+llama a `finishBoot()` directamente por su cuenta. Resultado: al saltar
+el boot, los `setTimeout` de tipeo del texto siguen corriendo en
+background sobre un `<div>` ya desmontado, y `onComplete`/`finishBoot` se
+puede disparar una segunda vez cuando esos timers residuales terminan
+solos — el test anterior no lo detectó porque solo probaba `skip()`
+aislado, nunca el wiring real de `main.ts`.
+
+**Fix**: `skipBoot` debe capturar el valor de retorno de
+`runBootSequence` (el cancelador real) e invocarlo, en vez de llamar
+`finishBoot()` por su cuenta. El test que falta debe ejercer el wiring
+completo (`main.ts`), no solo la función `skip()` en aislamiento — mismo
+tipo de gap que tuvo el bug de Tab en la 1ra ronda (test en aislamiento
+que no cubre la integración real).
 
 ## Depende de
 Nada bloqueante — 01 a 08 y 06-effects-v2 ya están cerrados. Este spec no

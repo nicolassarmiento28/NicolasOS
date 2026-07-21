@@ -277,6 +277,31 @@ describe("boot y onboarding-ux", () => {
     expect(document.querySelector("#boot-overlay")).toBeNull();
   });
 
+  it("saltar el boot cancela los timers de tipeo pendientes, sin dejarlos huérfanos corriendo sobre el overlay ya removido (specs/11-mejoras-interaccion.md, bug de auditoría)", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    await bootMain();
+
+    // dejamos terminar el tipeo del hint de fondo ("escribe help...", ajeno
+    // al boot overlay) para aislar los timers del boot log bajo prueba.
+    vi.advanceTimersByTime(2000);
+
+    // saltamos ANTES de que termine de tipear el boot log, con timers de
+    // tipeo todavía pendientes (el boot completo tarda ~2.1s).
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+    expect(document.querySelector("#boot-overlay")).toBeNull();
+
+    // el fix real: el cancelador de runBootSequence() debe haber limpiado
+    // sus setTimeout pendientes (clearTimeout), no solo desmontado el overlay.
+    expect(vi.getTimerCount()).toBe(0);
+
+    // avanzar el resto del tiempo del boot no debe reventar ni volver a tocar
+    // el DOM ya removido (el bug original: onComplete/finishBoot llamado 2 veces).
+    expect(() => vi.advanceTimersByTime(3000)).not.toThrow();
+    expect(document.querySelector("#boot-overlay")).toBeNull();
+
+    vi.useRealTimers();
+  });
+
   it('ArrowLeft/ArrowRight no interceptan el historial (comportamiento nativo)', async () => {
     await bootMain();
     const input = document.querySelector<HTMLInputElement>('#input')!;
