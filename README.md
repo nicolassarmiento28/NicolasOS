@@ -12,7 +12,7 @@ contenido: proyectos, skills, experiencia y contacto.
 ![Vitest](https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white)
 
-![Demo de NicolasOS](./docs/screenshot.png)
+![Demo de NicolasOS](./docs/screenshot.jpg)
 
 ---
 
