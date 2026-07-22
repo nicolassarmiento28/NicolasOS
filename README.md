@@ -19,6 +19,7 @@ contenido: proyectos, skills, experiencia y contacto.
 ## Índice
 
 - [Qué es esto](#qué-es-esto)
+- [Capturas](#capturas)
 - [Comandos disponibles](#comandos-disponibles)
 - [Temas](#temas)
 - [Vista normal (modo no técnico)](#vista-normal-modo-no-técnico)
@@ -50,6 +51,22 @@ Construido con **spec-driven development**: cada feature tiene sus
 criterios de aceptación escritos antes de implementarse, y el desarrollo se
 organiza por dominios con subagentes especializados de Claude Code (ver
 [Metodología](#metodología-spec-driven-development) más abajo).
+
+---
+
+## Capturas
+
+| Terminal (cyberpunk, default) | Tema `linux` |
+|---|---|
+| ![Tema cyberpunk](./docs/screenshot.jpg) | ![Tema linux](./docs/theme-linux.jpg) |
+
+| Tema `windows-xp` | Tema `hacker` |
+|---|---|
+| ![Tema windows-xp](./docs/theme-windows-xp.jpg) | ![Tema hacker](./docs/theme-hacker.jpg) |
+
+**Vista normal** (modo no técnico):
+
+![Vista normal](./docs/vista-normal.jpg)
 
 ---
 
