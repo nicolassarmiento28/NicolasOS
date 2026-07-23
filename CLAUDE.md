@@ -23,7 +23,7 @@ y el spec numerado del dominio correspondiente a la tarea.
 - `07-qa-testing.md` — estándar de cobertura de tests, transversal
 - `08-seguridad.md` — riesgos de XSS, links externos, dependencias, transversal
 - `10-diseno-visual.md` — dirección de arte transversal a temas y onboarding-ux
-- `11-mejoras-interaccion.md` — autocompletado con Tab, preview de temas, sonidos de teclado, boot extendido
+- `11-mejoras-interaccion.md` — autocompletado con Tab, preview de temas, sonidos de teclado, boot extendido (completado)
 
 ## Subagentes disponibles (.claude/agents/)
 - `orchestrator` — punto de entrada para avanzar sin especificar tarea puntual; decide orden y hace cumplir los gates
@@ -82,8 +82,10 @@ sí especifica dominio o tarea, se puede ir directo al subagente:
    (`feat(commands): add projects command`) y se detiene. El usuario
    hace el commit y push a mano.
 5. Si falla → se corrige antes de seguir.
-6. `06-effects-v2.md` ya está completado — matrix, music y los temas
-   extra están implementados y verificados, no queda trabajo pendiente ahí.
+6. `06-effects-v2.md` y `11-mejoras-interaccion.md` ya están completados
+   — matrix, music, temas extra, autocompletado, preview de temas,
+   sonidos y boot extendido están implementados y verificados, no queda
+   trabajo pendiente ahí.
 7. Desarrollo fase por fase: al cerrar todas las tareas de un dominio,
    orchestrator se detiene y espera confirmación explícita antes de
    arrancar el siguiente. No encadena dominios solo.
